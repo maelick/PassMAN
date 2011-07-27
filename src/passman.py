@@ -78,7 +78,7 @@ class PasswordManager(yaml.YAMLObject):
 
 def save(manager, filename, passphrase):
     """
-    Saves a PasswordManager in a file with YAML and AES-252-CBC (with openssl)
+    Saves a PasswordManager in a file with YAML and AES-256-CBC (with openssl)
     using a passphrase.
     """
     cmd = "openssl aes-256-cbc -salt -out {} -pass pass:{}".format(filename,
@@ -88,7 +88,7 @@ def save(manager, filename, passphrase):
 
 def load(filename, passphrase):
     """
-    Loads and returns a PasswordManager from a file with YAML and AES-252-CBC
+    Loads and returns a PasswordManager from a file with YAML and AES-256-CBC
     (with openssl) using a passphrase.
     """
     cmd = "openssl aes-256-cbc -d -salt " + \
