@@ -1,6 +1,6 @@
 #-*- coding: utf-8 -*-
 
-import yaml, subprocess, shlex
+import yaml, subprocess, shlex, re
 import passgen
 
 class PasswordEntry(yaml.YAMLObject):
@@ -10,14 +10,18 @@ class PasswordEntry(yaml.YAMLObject):
     and an optional comment. The site name and the username are used
     to generate the password, so if they change the password will change too.
     An optional additional salt can also be used to generate the password.
+    Each entry is associated with a category of entries.
     The entry is also identified by the kind of generator (symbols set and
     hash algorithm).
     """
     yaml_tag = u'!PasswordEntry'
-    def __init__(self, username, site, url, length=15,
-                 comment="", salt="", generator=None):
+    def __init__(self, username, site, url, comment="", salt="", length=15,
+                 category="Main", generator=None):
         """
         Initializes the entry with the parameters.
+        The generator must be a string representation of a
+        passgen.PasswordGenerator. If it is None, a default generator will be
+        used.
         """
         self.username = username
         self.site = site
@@ -25,6 +29,7 @@ class PasswordEntry(yaml.YAMLObject):
         self.length = length
         self.comment = comment
         self.salt = salt
+        self.category = category
         if generator is None:
             self.generator = passgen.PasswordGenerator()
         else:
@@ -41,6 +46,22 @@ class PasswordEntry(yaml.YAMLObject):
     def __str__(self):
         return "PasswordEntry<{} on site {}>".format(self.username, self.site)
 
+    def match(self, keywords):
+        """
+        Returns True if this entry website name, url, username, salt or
+        comment match any of the keywords of the list passed as argument.
+        The keywords can be regular expressions.
+        """
+        for k in keywords:
+            regex = re.compile(k, re.I)
+            if not re.findall(regex, self.username) and \
+               not re.findall(regex, self.site) and \
+               not re.findall(regex, self.url) and \
+               not re.findall(regex, self.comment) and \
+               not re.findall(regex, self.salt):
+                return False
+        return True
+
 class PasswordManager(yaml.YAMLObject):
     """
     A PasswordManager maintains lists of PasswordEntry objects that can be
@@ -53,28 +74,63 @@ class PasswordManager(yaml.YAMLObject):
         """
         self.passwords = {}
 
-    def get_password(self, title, category="Main"):
+    def get_entry(self, title, category="Main"):
         """
         Retrieves the PasswordEntry of a given title and category.
         """
         return self.passwords[category][title]
 
-    def set_password(self, password, title, category="Main"):
+    def get_entries(self, category):
         """
-        Modifies the PasswordEntry of a given title and category.
+        Retrieves all the PasswordEntries of a given category
         """
-        if self.passwords.has_key(category):
-            self.passwords[category][title] = password
-        else:
-            self.passwords[category] = {title: password}
+        return self.passwords[category]
 
-    def delete_password(self, password, title, category="Main"):
+    def add_entry(self, entry):
         """
-        Removes the PasswordEntry of a given title and category.
+        Adds a PasswordEntry.
         """
-        del self.passwords[category][title]
+        category = entry.category
+        if self.passwords.has_key(category):
+            self.passwords[category][entry.title] = entry
+        else:
+            self.passwords[category] = {entry.title: entry}
+
+    def delete_entry(self, entry):
+        """
+        Removes a PasswordEntry.
+        """
+        category = entry.category
+        del self.passwords[category][entry.title]
         if len(self.passwords[category]) == 0:
             del self.passwords[category]
+
+    def change_category(self, entry, category):
+        """
+        Changes the category of an entry
+        """
+        self.delete_entry(entry)
+        entry.category = category
+        self.add_entry(entry)
+
+    def get_catogories(self):
+        """
+        Returns the list of all the categories of PasswordEntries
+        """
+        return self.passwords.keys()
+
+    def filter_entries(self, keywords, categories=None):
+        """
+        Returns a subset of the entries where the site title, username, url,
+        salt or comment matches all the keywords (list of regular
+        expressions).
+        It is possible to filter entries from only a subset of categories.
+        """
+        if categories is None:
+            categories = self.get_categories()
+        for cat in categories:
+            entries.append(self.get_entries(cat).values())
+        return [e for e in entries if e.match(keywords)]
 
 def save(manager, filename, passphrase):
     """
