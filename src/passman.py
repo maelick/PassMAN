@@ -1,6 +1,6 @@
 #-*- coding: utf-8 -*-
 
-import yaml, subprocess, shlex, re
+import yaml, re
 import passgen
 
 class PasswordEntry(yaml.YAMLObject):
@@ -144,24 +144,3 @@ class PasswordManager(yaml.YAMLObject):
         for cat in categories:
             entries.append(self.get_entries(cat).values())
         return [e for e in entries if e.match(keywords)]
-
-def save(manager, filename, passphrase):
-    """
-    Saves a PasswordManager in a file with YAML and AES-256-CBC (with openssl)
-    using a passphrase.
-    """
-    cmd = "openssl aes-256-cbc -salt -out {} -pass pass:{}".format(filename,
-                                                                   passphrase)
-    p = subprocess.Popen(shlex.split(cmd), stdin=subprocess.PIPE)
-    p.communicate(yaml.dump(manager))
-
-def load(filename, passphrase):
-    """
-    Loads and returns a PasswordManager from a file with YAML and AES-256-CBC
-    (with openssl) using a passphrase.
-    """
-    cmd = "openssl aes-256-cbc -d -salt " + \
-          "-in {} -pass pass:{}".format(filename, passphrase)
-    p = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE)
-    result = p.communicate()[0]
-    return yaml.load(result)
