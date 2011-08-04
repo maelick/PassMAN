@@ -46,6 +46,9 @@ class PasswordEntry(yaml.YAMLObject):
     def __str__(self):
         return "PasswordEntry<{} on site {}>".format(self.username, self.site)
 
+    def title(self):
+        return "{}: {}".format(self.site, self.username)
+
     def match(self, keywords):
         """
         Returns True if this entry website name, url, username, salt or
@@ -82,9 +85,18 @@ class PasswordManager(yaml.YAMLObject):
 
     def get_entries(self, category):
         """
-        Retrieves all the PasswordEntries of a given category
+        Retrieves all the PasswordEntries of a given category.
         """
         return self.passwords[category]
+
+    def get_all_entries(self):
+        """
+        Retrieves all the PasswordEntries of all categories.
+        """
+        entries = []
+        for cat in self.passwords:
+            entries.append(self.get_entries(cat).values())
+        return entries
 
     def add_entry(self, entry):
         """
@@ -92,16 +104,16 @@ class PasswordManager(yaml.YAMLObject):
         """
         category = entry.category
         if self.passwords.has_key(category):
-            self.passwords[category][entry.title] = entry
+            self.passwords[category][entry.title()] = entry
         else:
-            self.passwords[category] = {entry.title: entry}
+            self.passwords[category] = {entry.title(): entry}
 
-    def delete_entry(self, entry):
+    def remove_entry(self, entry):
         """
         Removes a PasswordEntry.
         """
         category = entry.category
-        del self.passwords[category][entry.title]
+        del self.passwords[category][entry.title()]
         if len(self.passwords[category]) == 0:
             del self.passwords[category]
 
@@ -109,13 +121,13 @@ class PasswordManager(yaml.YAMLObject):
         """
         Changes the category of an entry
         """
-        self.delete_entry(entry)
+        self.remove_entry(entry)
         entry.category = category
         self.add_entry(entry)
 
-    def get_catogories(self):
+    def get_categories(self):
         """
-        Returns the list of all the categories of PasswordEntries
+        Returns the list of all the categories of PasswordEntries.
         """
         return self.passwords.keys()
 
@@ -128,6 +140,7 @@ class PasswordManager(yaml.YAMLObject):
         """
         if categories is None:
             categories = self.get_categories()
+        entries = []
         for cat in categories:
             entries.append(self.get_entries(cat).values())
         return [e for e in entries if e.match(keywords)]
