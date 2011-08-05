@@ -3,6 +3,13 @@
 import yaml, subprocess, shlex
 import passman
 
+class CodingError(Exception):
+    """
+    Exceptions raised when an error occured during encoding or decoding
+    of a manager.
+    """
+    pass
+
 class Loader:
     """
     A Loader is used to save and load a PasswordManager from a file.
@@ -42,6 +49,10 @@ class AESLoader(Loader):
     AES-256-CBC (with OpenSSL) using a passphrase.
     """
     def save(self, manager, filename, passphrase=None):
+        """
+        Saves the manager from the filename using OpenSSL and YAML.
+        Raises a CodingError if OpenSSL was unable to encode the file.
+        """
         with open(filename, 'w') as f:
             cmd = "openssl aes-256-cbc -salt -pass pass:{}".format(passphrase)
             p = subprocess.Popen(shlex.split(cmd),
@@ -52,9 +63,13 @@ class AESLoader(Loader):
             if not result[1]:
                 f.write(result[0])
             else:
-                return None # TODO: exception to throw
+                raise CodingError
 
     def load(self, filename, passphrase=None):
+        """
+        Loads the manager from the filename using OpenSSL and YAML.
+        Raises a CodingError if OpenSSL was unable to decode the file.
+        """
         with open(filename) as f:
             cmd = "openssl aes-256-cbc -d -salt " + \
                   "-pass pass:{}".format(passphrase)
@@ -66,4 +81,4 @@ class AESLoader(Loader):
             if not result[1]:
                 return yaml.load(result[0])
             else:
-                return None # TODO: exception to throw
+                raise CodingError
