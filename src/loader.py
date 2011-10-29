@@ -2,6 +2,7 @@
 
 import yaml, subprocess, shlex, bz2
 import passman
+from ftplib import FTP
 
 class CodingError(Exception):
     """
@@ -131,3 +132,28 @@ class DistantLoader(Loader):
         """
         self.get(filename)
         return self.load(filename, passphrase)
+
+
+class FTPLoader(DistantLoader):
+    """
+    An FTPLoader is used to save and load a PasswordManager from a distant
+    file stored on a FTP server.
+    """
+
+    def __init__(self, loader, dist_filename, host, user=None, passwd=""):
+        """
+        Initializes the DistantLoader with the Loader to use to decode/encode
+        the distant file, a distant filename and with the connections
+        parameters to use.
+        """
+        DistantLoader.__init__(self, loader)
+        self.dist_filename = dist_filename
+        self.ftp = FTP(host, user, passwd)
+
+    def get(self, filename):
+        with open(filename, 'w'):
+            self.ftp.retrbinary('RETR {}'.format(self.dist_filename), f)
+
+    def put(self, filename):
+        with open(filename,):
+            self.ftp.storbinary('STOR {}'.format(self.dist_filename), f)
