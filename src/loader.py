@@ -148,12 +148,18 @@ class FTPLoader(DistantLoader):
         """
         DistantLoader.__init__(self, loader)
         self.dist_filename = dist_filename
-        self.ftp = FTP(host, user, passwd)
+        self.host = host
+        self.user = user
+        sellf.passwd = passwd
 
     def get(self, filename):
+        ftp = FTP(self.host, self.user, self.passwd)
         with open(filename, 'w'):
-            self.ftp.retrbinary('RETR {}'.format(self.dist_filename), f)
+            ftp.retrbinary('RETR {}'.format(self.dist_filename), f)
+        ftp.close()
 
     def put(self, filename):
+        ftp = FTP(self.host, self.user, self.passwd)
         with open(filename,):
-            self.ftp.storbinary('STOR {}'.format(self.dist_filename), f)
+            ftp.storbinary('STOR {}'.format(self.dist_filename), f)
+        ftp.close()
