@@ -15,6 +15,7 @@ class Loader:
     A Loader is used to save and load a PasswordManager from a file.
     Loader is an abstract class that should be overriden.
     """
+
     def save(self, manager, filename, passphrase=None):
         """
         Saves a PasswordManager in a file using an optional passphrase.
@@ -35,6 +36,7 @@ class YAMLLoader(Loader):
     A YAMLLoader stores and retrives the PasswordManager using YAML in a
     plain text file.
     """
+
     def save(self, manager, filename, passphrase=None):
         with open(filename, 'w') as f:
             yaml.dump(manager, f)
@@ -48,6 +50,7 @@ class AESLoader(Loader):
     An AESLoader stores and retrives the PasswordManager using YAML and
     AES-256-CBC (with OpenSSL) using a passphrase.
     """
+
     def save(self, manager, filename, passphrase=None):
         """
         Saves the manager from the filename using OpenSSL and YAML.
@@ -82,3 +85,49 @@ class AESLoader(Loader):
                 return yaml.load(result[0])
             else:
                 raise CodingError
+
+class DistantLoader:
+    """
+    A DistantLoader is used to save and load a PasswordManager from a distant
+    file.
+    DistantLoader is an abstract class that should be overriden.
+    """
+
+    def __init__(self, filename, loader):
+        """
+        Initializes the DistantLoader with the Loader to use to decode/encode
+        the distant file.
+        """
+        self.loader = loader
+
+    def get(self, filename):
+        """
+        Retrieves a distant file.
+        This method is abstract and must be overriden.
+        """
+        pass
+
+    def put(self, filename):
+        """
+        Uploads a distant file.
+        This method is abstract and must be overriden.
+        """
+        pass
+
+    def save(self, manager, filename, passphrase=None):
+        """
+        Saves a PasswordManager to a distant file using an optional passphrase
+        and upload it to the distant location.
+        The filename is used is used for the local temporary file.
+        """
+        self.loader.save(filename, passphrase)
+        self.put(filename)
+
+    def load(self, filename, passphrase=None):
+        """
+        Retrieves, loads and returns a PasswordManager from a distant file
+        using an optional passphrase.
+        The filename is used is used for the local temporary file.
+        """
+        self.get(filename)
+        return self.load(filename, passphrase)
