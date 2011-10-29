@@ -1,6 +1,6 @@
 #-*- coding: utf-8 -*-
 
-import yaml, subprocess, shlex
+import yaml, subprocess, shlex, bz2
 import passman
 
 class CodingError(Exception):
@@ -47,13 +47,13 @@ class YAMLLoader(Loader):
 
 class AESLoader(Loader):
     """
-    An AESLoader stores and retrives the PasswordManager using YAML and
+    An AESLoader stores and retrives the PasswordManager using YAML, bzip2 and
     AES-256-CBC (with OpenSSL) using a passphrase.
     """
 
     def save(self, manager, filename, passphrase=None):
         """
-        Saves the manager from the filename using OpenSSL and YAML.
+        Saves the manager from the filename using OpenSSL, bzip2 and YAML.
         Raises a CodingError if OpenSSL was unable to encode the file.
         """
         with open(filename, 'w') as f:
@@ -62,7 +62,7 @@ class AESLoader(Loader):
                                  stdin=subprocess.PIPE,
                                  stdout=subprocess.PIPE,
                                  stderr=subprocess.PIPE)
-            result = p.communicate(yaml.dump(manager))
+            result = p.communicate(bz2.compress(yaml.dump(manager)))
             if not result[1]:
                 f.write(result[0])
             else:
@@ -82,18 +82,18 @@ class AESLoader(Loader):
                                  stderr=subprocess.PIPE)
             result = p.communicate(f.read())
             if not result[1]:
-                return yaml.load(result[0])
+                return yaml.load(bz2.decompress(result[0]))
             else:
                 raise CodingError
 
-class DistantLoader:
+class DistantLoader(Loader):
     """
     A DistantLoader is used to save and load a PasswordManager from a distant
     file.
     DistantLoader is an abstract class that should be overriden.
     """
 
-    def __init__(self, filename, loader):
+    def __init__(self, loader):
         """
         Initializes the DistantLoader with the Loader to use to decode/encode
         the distant file.
