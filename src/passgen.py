@@ -1,11 +1,48 @@
 #-*- coding: utf-8 -*-
 
-import random, hashlib, yaml
+import random, hashlib, yaml, math, base64, os.path, re
 
-default_symbols = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" + \
-                  "0123456789!\"?$%^&*()_-+={}[]:;@'~#|\<,>./"
+class PasswordGenerator:
+    """
+    A PasswordGenerator is an object used to generate a pseudo-random
+    password which can be secure.
+    It allows to generate a simple pseudo-random password or a password
+    generated with a seed based on the hash of a passphrase. This is used by
+    Password objects to get a password based on a site, username and a master
+    passphrase to retrieve a password without storing it anywhere on disk.
+    This class is abstract and subclasses implement different algorithms.
+    """
+    yaml_tag = u'!PasswordGenerator'
 
-class PasswordGenerator(yaml.YAMLObject):
+    def get_entropy(self, length):
+        """
+        Returns the entropy for a given length.
+        This is an abstract method that needs to be overriden.
+        """
+        pass
+
+    def get_minimum_length(self, entropy):
+        """
+        Returns the length to have password for a minimum entropy.
+        """
+        return int(math.ceil(self.get_length(entropy)))
+
+    def get_length(self, entropy):
+        """
+        Returns the length to have password with a given entropy.
+        This is an abstract method that needs to be overriden.
+        """
+        pass
+
+    def get_password(self, name, username, nonce, passphrase):
+        """
+        Returns the next secure password of length n given by the generator
+        depending of the passphrase, name username and nonce.
+        This is an abstract method that needs to be overriden.
+        """
+        pass
+
+class PassmanGenerator(PasswordGenerator):
     """
     A PasswordGenerator is an object used to generate a pseudo-random
     password which can be secure.
@@ -15,18 +52,34 @@ class PasswordGenerator(yaml.YAMLObject):
     on a site, username and a master passphrase to retrieve a password without
     storing it anywhere on disk.
     """
-    yaml_tag = u'!PasswordGenerator'
-    def __init__(self, symbols=default_symbols, algo="sha512"):
+    yaml_tag = u'!PassmanGenerator'
+
+    def __init__(self, filename, algo="sha512"):
         """
-        Initializes the generator with a string containing the symbols
-        used by the generator and using an algorithm name for the hash
-        function.
-        The result of the secure password will depend on the order of the
-        symbols in the string.
-        The default algorithm is SHA-512
+        Initializes the generator with:
+          * the name of the file with each line containing each symbol
+          * the hash algorithm name (default is SHA-512)
+        The result of the secure password will depend of the symbols order
+        in the file.
         """
-        self.symbols = symbols
+        self.filename = filename
+        with open(filename) as f:
+            self.symbols = [l.strip() for l in f.readlines()
+                            if len(l.strip()) > 0]
+        self.sep = ""
         self.algo = algo
+
+    def get_entropy(self, length):
+        """
+        Returns the entropy for a given length.
+        """
+        return math.log(len(self.symbols) ** length, 2)
+
+    def get_length(self, entropy):
+        """
+        Returns the length to have password for a given entropy.
+        """
+        return math.log(2 ** entropy, len(self.symbols))
 
     def next_symbol(self):
         """
@@ -39,15 +92,16 @@ class PasswordGenerator(yaml.YAMLObject):
         Returns the next password given of length n (15 by default) by
         the generator.
         """
-        return ''.join((self.next_symbol() for i in xrange(n)))
+        return self.sep.join((self.next_symbol() for i in xrange(n)))
 
-    def get_secure_password(self, passphrase, n=15):
+    def get_password(self, name, username, nonce, passphrase, n):
         """
-        Returns the next secure password of length n (15 by default) given
-        by the generator depending of the passphrase.
+        Returns the next secure password of length n given by the generator
+        depending of the passphrase, name username and nonce.
         """
         state = random.getstate()
-        seed = hashlib.new(self.algo, passphrase).digest()
+        string = name + username + nonce + passphrase
+        seed = hashlib.new(self.algo, string).digest()
         random.seed(seed)
         password = self.get_simple_password(n)
         random.setstate(state)
@@ -59,51 +113,92 @@ class PasswordGenerator(yaml.YAMLObject):
         the same symbols and same algorithm).
         """
         if isinstance(other, self.__class__):
-            return self.symbols == other.symbols and self.algo == other.algo
+            return self.symbols == other.symbols and \
+                   self.sep == other.sep and self.algo == other.algo
         else:
             return True
 
-    def __str__(self):
-        """
-        Returns a string representing this PasswordGenerator.
-        The string representation looks like
-        PasswordGenerator<algo: symbols> where algo is the algorithm
-        naame and symbols is the set of symbols.
-        """
-        return "PasswordGenerator<{}: {}>".format(self.algo, self.symbols)
+class OplopGenerator(PasswordGenerator):
+    """
+    Generates passwords using the Oplop's algorithm
+    (http://code.google.com/p/oplop/wiki/HowItWorks).
+    The canonical algorithm uses a length of 8 for passwords. This
+    implementation can use any arbitrary length/entropy.
+    """
+    yaml_tag = u'!OplopGenerator'
 
-def parse(generator):
-    """
-    Parses a string which represents a PasswordGenerator looking like the
-    string representation of the object.
-    """
-    algo, symbols = generator.split("<", 1)[1].split(":", 1)
-    algo = algo.strip()
-    symbols = symbols.rsplit(">", 1)[0].strip()
-    return PasswordGenerator(symbols, algo)
+    def get_entropy(self, length):
+        """
+        Returns the entropy for a given length.
+        """
+        return math.log(64 ** (length - 1) * 10, 2)
 
-class Password:
-    """
-    A Password represents a password used for a username, for a
-    given site, a length and using a specified generator.
-    It can use a salt which is an additional string (that can be empty)
-    used to generate the password.
-    The passwordis is retrieved based on a passphrase.
-    """
-    def __init__(self, site, salt, username, generator, n=15):
+    def get_length(self, entropy):
         """
-        Initializes the password with the site, salt, username, generator
-        and length (which is 15 by default).
+        Returns the length to have password for a given entropy.
         """
-        self.site = site
-        self.salt = salt
-        self.username = username
-        self.generator = generator
-        self.length = n
+        return math.log(2 ** entropy / 10., 64) + 1
 
-    def get_password(self, passphrase):
+    def get_password(self, name, username, nonce, passphrase, n=8):
         """
-        Returns the password using the passphrase.
+        Returns the next secure password of length n given by the generator
+        depending of the passphrase, name username and nonce.
         """
-        passphrase = self.site + self.salt + self.username + passphrase
-        return self.generator.get_secure_password(passphrase, self.length)
+        md5 = hashlib.md5()
+        md5.update(passphrase)
+        md5.update(username)
+        md5 = base64.urlsafe_b64encode(md5.digest())
+        found = re.search(r"\d+", md5)
+        if not found:
+            md5 = '1' + md5
+        elif found.start() >= n:
+            md5 = found.group() + md5
+        return md5[:n]
+
+class SuperGenPassGenerator(PasswordGenerator):
+    yaml_tag = u'!SuperGenPassGenerator'
+    pass
+
+class PasswordComposerGenerator(PasswordGenerator):
+    yaml_tag = u'!PasswordComposerGenerator'
+    pass
+
+class GeneratorManager:
+    """
+    A GeneratorManager is used to manage the different PasswordGenerators.
+    It's main use is for loading into memory only PassmanGenerators that are
+    needed. It still loads Oplop, SuperGenPass and PasswordComposer managers.
+    """
+    yaml_tag = u'!GeneratorManager'
+
+    def __init__(self, directory):
+        """
+        Initializes the manager with the path name of the directory which
+        contains the symbol's size for the PassmanGenerators.
+        """
+        self.directory = directory
+        self.generators = {
+            "oplop": OplopGenerator(),
+            "supergenpass": SuperGenPassGenerator(),
+            "passwordcomposer": PasswordComposerGenerator()
+            }
+
+    def get_generator(self, name):
+        """
+        Returns the generator with his name.
+        oplop, supergenpass and passwordcomposer is used for their respective
+        generator.
+        For PassmanGenerators, the name is the hash algorithm's name and
+        the symbol's filename separated by a colon.
+        For example, "sha512:ascii" will use SHA-512 as the hash algorithm
+        and the ascii file containing 94 usable ASCII characters.
+        """
+        if name == "oplop" or name == "supergenpass" or \
+               name == "passwordcomposer":
+            return self.generators[name]
+        else:
+            if name not in self.generators:
+                algo, filename = name.split(":", 1)
+                filename = os.path.join(self.directory, filename)
+                self.generators[name] = PassmanGenerator(filename, algo)
+            return self.generators[name]
