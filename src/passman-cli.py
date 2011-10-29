@@ -12,8 +12,10 @@ class CLI:
     def init_parser(self):
         desc = "PassMAN Command Line Interface."
         parser = argparse.ArgumentParser(description=desc)
-        parser.add_argument("--db", required=True,
-                                help="The database filename to use.")
+        parser.add_argument("--db",
+                            help="The passwords database filename to use." + \
+                            "If not provided, will use configuration " + \
+                            "file ~/.passman")
 
         type_group = parser.add_mutually_exclusive_group()
         type_group.add_argument("--yaml",
@@ -26,26 +28,14 @@ class CLI:
                                 action="store_const",
                                 const="aes",
                                 dest="db_type",
-                                help="Uses an AES-256-CBC encrypted YAML " + \
-                                "file as password database.")
+                                help="Uses an AES-256-CBC encrypted and " + \
+                                "compressed YAML file as passwords database.")
         type_group.add_argument("--gpg",
                                 action="store_const",
                                 const="gpg",
                                 dest="db_type",
-                                help="Uses a GPG encrypted YAML file as " + \
-                                "password database.")
-
-        pass_group = parser.add_mutually_exclusive_group()
-        pass_group.add_argument("-a", "--askpassphrase",
-                                action="store_true",
-                                help="If specified, the password will " + \
-                                "be asked in a secure way instead of " + \
-                                "being provided in the command line.")
-        pass_group.add_argument("-p", "--passphrase",
-                                help="The passphrase to use for " + \
-                                "encrypting and decrypting the password " + \
-                                "database. Do not use if the file is " + \
-                                "not encrypted.")
+                                help="Uses a GPG encrypted and compressed " + \
+                                "YAML file as passwords database.")
 
         parser.add_argument("-n", "--newdb",
                             action="store_true",
@@ -57,52 +47,115 @@ class CLI:
     def init_commands(self):
         title = "PassMAN-CLI Action"
         desc = "The action to do on the password database."
-        help =  "Use -h or --help with the action for more details."
-        self.commands_parser = self.parser.add_subparsers(title=title,
-                                                          description=desc,
-                                                          help=help,
-                                                          metavar="action")
+        help = "Use -h or --help with the action for more details."
+        self.cmd_parsers = self.parser.add_subparsers(title=title,
+                                                      description=desc,
+                                                      help=help,
+                                                      metavar="action_name")
+
         self.init_generate()
+        self.init_retrieve()
         self.init_list()
+        self.init_add()
+        self.init_add_tag()
+        self.init_remove_tag()
         self.init_remove()
         self.init_password()
+        self.init_curses()
+        self.init_gtk()
 
     def init_generate(self):
         help="Generates a random strong password."
-        generate_parser = self.commands_parser.add_parser("generate",
-                                                           help=help)
-        self.action = self.generate_action
+        cmd_parser = self.cmd_parsers.add_parser("generate", help=help)
+        cmd_parser.set_defaults(action=self.generate_action)
 
     def generate_action(self):
+        print "generate"
+        pass # TODO
+
+    def init_retrieve(self):
+        help="Retrieves the distant passwords database."
+        cmd_parser = self.cmd_parsers.add_parser("retrieve", help=help)
+        cmd_parser.set_defaults(action=self.retrieve_action)
+
+    def retrieve_action(self):
+        print "retrieve"
         pass # TODO
 
     def init_list(self):
         help="Lists (or filters) the entries of the database."
-        list_parser = self.commands_parser.add_parser("list", help=help)
-        self.action = self.list_action
+        cmd_parser = self.cmd_parsers.add_parser("list", help=help)
+        cmd_parser.set_defaults(action=self.list_action)
 
     def list_action(self):
+        print "list"
+        pass # TODO
+
+    def init_add(self):
+        help="Adds an entry to the passwords database."
+        cmd_parser = self.cmd_parsers.add_parser("add", help=help)
+        cmd_parser.set_defaults(action=self.add_action)
+
+    def add_action(self):
+        print "add"
+        pass # TODO
+
+    def init_add_tag(self):
+        help="Adds a tag to the matching entries."
+        cmd_parser = self.cmd_parsers.add_parser("add_tag", help=help)
+        cmd_parser.set_defaults(action=self.add_tag_action)
+
+    def add_tag_action(self):
+        print "add_tag"
+        pass # TODO
+
+    def init_remove_tag(self):
+        help="Removes a tag from the matching entries."
+        cmd_parser = self.cmd_parsers.add_parser("remove_tag", help=help)
+        cmd_parser.set_defaults(action=self.remove_tag_action)
+
+    def remove_tag_action(self):
+        print "remove_tag"
         pass # TODO
 
     def init_remove(self):
         help="Removes one entry of the database."
-        remove_parser = self.commands_parser.add_parser("remove", help=help)
-        self.action = self.remove_action
+        cmd_parser = self.cmd_parsers.add_parser("remove", help=help)
+        cmd_parser.set_defaults(action=self.remove_action)
 
     def remove_action(self):
+        print "remove"
         pass # TODO
 
     def init_password(self):
         help="Gets the associated password of an entry."
-        password_parser = self.commands_parser.add_parser("password",
-                                                          help=help)
-        self.action = self.password_action
+        cmd_parser = self.cmd_parsers.add_parser("password", help=help)
+        cmd_parser.set_defaults(action=self.password_action)
 
     def password_action(self):
+        print "password"
         pass # TODO
 
-    def parse_args(self):
-        self.args = self.parser.parse_args()
+    def init_curses(self):
+        help="Opens the curses UI."
+        cmd_parser = self.cmd_parsers.add_parser("curses", help=help)
+        cmd_parser.set_defaults(action=self.curses_action)
+
+    def curses_action(self):
+        print "curses"
+        pass # TODO
+
+    def init_gtk(self):
+        help="Opens the GTK GUI."
+        cmd_parser = self.cmd_parsers.add_parser("gtk", help=help)
+        cmd_parser.set_defaults(action=self.gtk_action)
+
+    def gtk_action(self):
+        print "gtk"
+        pass # TODO
+
+    def parse_args(self, args=None):
+        self.args = self.parser.parse_args(args)
 
     def load_database(self):
         if self.args.db_type == "gpg":
@@ -114,14 +167,16 @@ class CLI:
 
         if self.args.newdb:
             self.manager = passman.PasswordManager()
+        elif self.args.db:
+            self.manager = self.loader.load(self.args.db)
         else:
-            self.manager = self.loader.load(args.db)
+            self.manager = None
 
 def main():
     cli = CLI()
     cli.parse_args()
     cli.load_database()
-    cli.action()
+    cli.args.action()
     return 0
 
 if __name__ == "__main__":
