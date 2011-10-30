@@ -54,14 +54,12 @@ class PasswordEntry(yaml.YAMLObject):
         generator = generator_manager.get_generator(self.generator)
         return max(generator.get_entropy(self.length), self.entropy)
 
+    def __hash__(self):
+        return 0
+
     def __eq__(self, other):
         return isinstance(other, PasswordEntry) and \
-               self.generator == other.generator and \
-               self.name == other.name and \
-               self.username == other.username and \
-               self.nonce == other.nonce and \
-               self.comment == other.comment and \
-               self.length == other.length
+               self.name == other.name
 
     def match_re(self, regex):
         """
