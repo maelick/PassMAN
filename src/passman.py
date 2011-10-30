@@ -61,6 +61,12 @@ class PasswordEntry(yaml.YAMLObject):
         return isinstance(other, PasswordEntry) and \
                self.name == other.name
 
+    def __str__(self):
+        return "{} ({}): {} ({}): {}: {}/{}".format(self.name, self.generator,
+                                                    self.username, self.nonce,
+                                                    self.comment, self.length,
+                                                    self.entropy)
+
     def match_re(self, regex):
         """
         Returns True if the regular expression passed as parameter matches
