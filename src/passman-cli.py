@@ -134,7 +134,8 @@ class CLI:
         help="Adds an entry to the passwords database."
         cmd_parser = self.cmd_parsers.add_parser("add", help=help)
         cmd_parser.set_defaults(action=self.add_action)
-        cmd_parser.add_argument("--generator", required=True,
+        default_generator = self.conf["default_generator"]
+        cmd_parser.add_argument("--generator", default=default_generator],
                                 help="The generator's name.")
         cmd_parser.add_argument("--name", required=True,
                                 help="The entry's name.")
