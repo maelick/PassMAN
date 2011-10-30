@@ -92,14 +92,38 @@ class CLI:
         help="Lists the entries of the database."
         cmd_parser = self.cmd_parsers.add_parser("list", help=help)
         cmd_parser.set_defaults(action=self.list_action)
-        cmd_parser.add_argument("-t", "--tag",
-                                help="The tag of the entries to list.")
+        group = cmd_parser.add_mutually_exclusive_group()
+        group.add_argument("-t", "--tag",
+                           help="The tag of the entries to list.")
+        group.add_argument("-f", "--filter",
+                           help="Regexp used to filter the list to print.")
+        cmd_parser.add_argument("--sep", default="|",
+                                help="The separator used to define " +
+                                "multiple regexp.")
+        cmd_parser.add_argument("--entropy",
+                                action="store_true",
+                                help="Computes the entries entropy.")
 
     def list_action(self):
         self.load_database()
-        entries = self.manager.get_entries(self.args.tag)
-        for e in entries:
-            print e
+        if self.args.filter:
+            keywords = self.args.filter.split(self.args.sep)
+            entries = self.manager.filter(keywords)
+        else:
+            entries = self.manager.get_entries(self.args.tag)
+
+        print "i) name (generator): username [(nonce)] [(comment)]: " + \
+              "minimum length/entropy (tag list)"
+        for i, e in enumerate(entries):
+            if self.args.entropy:
+                entropy = e.get_entropy(self.manager.generator_manager)
+                s = "{}) {}/{}".format(i, e, entropy)
+            else:
+                s = "{}) {}".format(i, e)
+            if e.tags:
+                print "{} ({})".format(s, ", ".join(e.tags))
+            else:
+                print s
 
     def init_add(self):
         help="Adds an entry to the passwords database."
@@ -112,8 +136,8 @@ class CLI:
         cmd_parser.add_argument("--username", required=True)
         cmd_parser.add_argument("--comment", default="")
         cmd_parser.add_argument("--nonce", default="")
-        cmd_parser.add_argument("--length", default=15)
-        cmd_parser.add_argument("--entropy", default=None)
+        cmd_parser.add_argument("--length", type=int, default=15)
+        cmd_parser.add_argument("--entropy", type=int, default=None)
 
     def add_action(self):
         self.load_database()
@@ -121,26 +145,59 @@ class CLI:
                                       self.args.username, self.args.comment,
                                       self.args.nonce, self.args.length,
                                       self.args.entropy)
-        self.manager.add_entry(entry)
+        self.manager.set_entry(entry)
+        entry.get_password(self.manager.generator_manager, "")
         self.save_database()
 
     def init_add_tag(self):
         help="Adds a tag to the matching entries."
         cmd_parser = self.cmd_parsers.add_parser("add_tag", help=help)
         cmd_parser.set_defaults(action=self.add_tag_action)
+        group = cmd_parser.add_mutually_exclusive_group()
+        group.add_argument("-f", "--filter",
+                           help="Regexp used to filter the list to print.")
+        cmd_parser.add_argument("--sep", default="|",
+                                help="The separator used to define " +
+                                "multiple regexp.")
+        cmd_parser.add_argument("-t", "--tag", required=True,
+                                help="The tag to add.")
 
     def add_tag_action(self):
-        print "add_tag"
-        pass # TODO
+        self.load_database()
+        if self.args.filter:
+            keywords = self.args.filter.split(self.args.sep)
+            entries = self.manager.filter(keywords)
+        else:
+            entries = self.manager.get_entries()
+
+        for e in entries:
+            self.manager.add_tag(e, self.args.tag)
+        self.save_database()
 
     def init_remove_tag(self):
         help="Removes a tag from the matching entries."
         cmd_parser = self.cmd_parsers.add_parser("remove_tag", help=help)
         cmd_parser.set_defaults(action=self.remove_tag_action)
+        group = cmd_parser.add_mutually_exclusive_group()
+        group.add_argument("-f", "--filter",
+                           help="Regexp used to filter the list to print.")
+        cmd_parser.add_argument("--sep", default="|",
+                                help="The separator used to define " +
+                                "multiple regexp.")
+        cmd_parser.add_argument("-t", "--tag", required=True,
+                                help="The tag to add.")
 
     def remove_tag_action(self):
-        print "remove_tag"
-        pass # TODO
+        self.load_database()
+        if self.args.filter:
+            keywords = self.args.filter.split(self.args.sep)
+            entries = self.manager.filter(keywords)
+        else:
+            entries = self.manager.get_entries()
+
+        for e in entries:
+            self.manager.remove_tag(e, self.args.tag)
+        self.save_database()
 
     def init_remove(self):
         help="Removes one entry of the database."
