@@ -119,7 +119,7 @@ class DistantLoader(Loader):
         """
         Saves a PasswordManager to a distant file using an optional passphrase
         and upload it to the distant location.
-        The filename is used is used for the local temporary file.
+        The filename is used for the local temporary file.
         """
         self.loader.save(filename, passphrase)
         self.put(filename)
@@ -128,7 +128,7 @@ class DistantLoader(Loader):
         """
         Retrieves, loads and returns a PasswordManager from a distant file
         using an optional passphrase.
-        The filename is used is used for the local temporary file.
+        The filename is used for the local temporary file.
         """
         self.get(filename)
         return self.load(filename, passphrase)
