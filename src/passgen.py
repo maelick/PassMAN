@@ -152,8 +152,10 @@ class OplopGenerator(PasswordGenerator):
         Returns the next password given of length n (8 by default) by
         the generator.
         """
-        username = "".join([chr(33 + random.randrange(94)) for i in xrange(n)])
-        passphrase = "".join([chr(33 + random.randrange(94)) for i in xrange(n)])
+        username = "".join([chr(33 + random.randrange(94)) \
+                            for i in xrange(n)])
+        passphrase = "".join([chr(33 + random.randrange(94)) \
+                              for i in xrange(n)])
         return self.get_password("", username, "", passphrase, n)
 
     def get_password(self, name, username, nonce, passphrase, n=8):

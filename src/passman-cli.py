@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #-*- coding: utf-8 -*-
 
-import argparse, sys, yaml, os.path, getpass
+import argparse, sys, yaml, os.path, getpass, subprocess
 import loader, passman
 
 class CLI:
@@ -251,13 +251,17 @@ class CLI:
 
         entry = entries[self.args.index]
         print "Password for entry: {}".format(entry)
+        prompt = "Please enter the master passphrase: "
+        passphrase = getpass.getpass(prompt)
+        password = entry.get_password(self.manager.generator_manager,
+                                      passphrase)
+
         if self.args.clipboard:
-            pass # TODO
+            p = subprocess.Popen(["xclip", "-i", "-selection", "clipboard"],
+                                 stdin=subprocess.PIPE)
+            p.communicate(password)
         else:
-            prompt = "Please enter the master passphrase: "
-            passphrase = getpass.getpass(prompt)
-            print entry.get_password(self.manager.generator_manager,
-                                     passphrase)
+            print password
 
     def init_generate(self):
         help="Generates a random strong password."
@@ -293,7 +297,9 @@ class CLI:
         print "Random password of length {} (entropy={}):".format(length,
                                                                   entropy)
         if self.args.clipboard:
-            print "Copied to system clipboard" # TODO
+            p = subprocess.Popen(["xclip", "-i", "-selection", "clipboard"],
+                                 stdin=subprocess.PIPE)
+            p.communicate(password)
         else:
             print password
 
