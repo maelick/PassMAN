@@ -150,7 +150,7 @@ class FTPLoader(DistantLoader):
         self.dist_filename = dist_filename
         self.host = host
         self.user = user
-        sellf.passwd = passwd
+        self.passwd = passwd
 
     def get(self, filename):
         ftp = FTP(self.host, self.user, self.passwd)

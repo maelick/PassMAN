@@ -37,6 +37,32 @@ class CLI:
                                 help="Uses a GPG encrypted and compressed " + \
                                 "YAML file as passwords database.")
 
+        dtype_group = parser.add_mutually_exclusive_group()
+        dtype_group.add_argument("--ftp",
+                                 action="store_const",
+                                 const="ftp",
+                                 dest="dist_type",
+                                 help="Retrieves/push the passwords " + \
+                                 "database file from/to a FTP.")
+        dtype_group.add_argument("--ssh",
+                                 action="store_const",
+                                 const="ssh",
+                                 dest="dist_type",
+                                 help="Retrieves/push the passwords " + \
+                                 "database file using SSH.")
+
+        parser.add_argument("--host",
+                            help="The server's host.")
+        parser.add_argument("-p", "--port",
+                            action="store_true",
+                            help="The port to use to access the server.")
+        parser.add_argument("-u", "--username",
+                            help="The username to use to access the " + \
+                            "server.")
+        parser.add_argument("-f", "--file",
+                            help="The distant file to retrieve/push " + \
+                            "the database from/to.")
+
         parser.add_argument("-n", "--newdb",
                             action="store_true",
                             help="Creates a new password database file " + \
@@ -55,6 +81,7 @@ class CLI:
 
         self.init_generate()
         self.init_retrieve()
+        self.init_push()
         self.init_list()
         self.init_add()
         self.init_add_tag()
@@ -80,6 +107,15 @@ class CLI:
 
     def retrieve_action(self):
         print "retrieve"
+        pass # TODO
+
+    def init_push(self):
+        help="Pushes the distant passwords database."
+        cmd_parser = self.cmd_parsers.add_parser("push", help=help)
+        cmd_parser.set_defaults(action=self.push_action)
+
+    def push_action(self):
+        print "push"
         pass # TODO
 
     def init_list(self):
@@ -164,6 +200,13 @@ class CLI:
             self.loader = loader.AESLoader()
         else:
             self.loader = loader.YAMLLoader()
+
+        if self.args.dist_type == "ftp":
+            self.loader = loader.FTPLoader(self.loader, self.args.file,
+                                           self.args.host,
+                                           self.args.username, "")
+        elif self.args.dist_type == "ssh":
+            pass # TODO
 
         if self.args.newdb:
             self.manager = passman.PasswordManager()
