@@ -444,12 +444,16 @@ class CLI:
         if not self.args.dist_type:
             self.args.dist_type = self.conf["default_distant"]
         if self.args.dist_type == "ftp":
-            passwd = "MElz1Ous"
+            passwd = getpass.getpass("FTP password: ")
             return loader.FTPLoader(self.loader, self.conf["ftp"]["filename"],
                                     self.conf["ftp"]["host"],
                                     self.conf["ftp"]["username"], passwd)
         elif self.args.dist_type == "ssh":
-            pass # TODO
+            passwd = getpass.getpass("SSH password: ")
+            return loader.SFTPLoader(self.loader, self.conf["ssh"]["filename"],
+                                     self.conf["ssh"]["host"],
+                                     self.conf["ssh"]["port"],
+                                     self.conf["ssh"]["username"], passwd)
 
     def load_database(self):
         """

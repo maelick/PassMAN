@@ -1,6 +1,6 @@
 #-*- coding: utf-8 -*-
 
-import yaml, subprocess, shlex, bz2
+import yaml, subprocess, shlex, bz2, paramiko, getpass, shutil, os.path
 import passman
 from ftplib import FTP
 
@@ -136,7 +136,7 @@ class DistantLoader(Loader):
 
 class FTPLoader(DistantLoader):
     """
-    An FTPLoader is used to save and load a PasswordManager from a distant
+    A FTPLoader is used to save and load a PasswordManager from a distant
     file stored on a FTP server.
     """
 
@@ -152,14 +152,89 @@ class FTPLoader(DistantLoader):
         self.user = user
         self.passwd = passwd
 
+    def connect(self):
+        """
+        Establish the connection with the remote server.
+        """
+        self.ftp = FTP(self.host, self.user, self.passwd)
+
     def get(self, filename):
-        ftp = FTP(self.host, self.user, self.passwd)
+        self.connect()
         with open(filename, 'w') as f:
-            ftp.retrbinary('RETR {}'.format(self.dist_filename), f.write)
-        ftp.close()
+            self.ftp.retrbinary('RETR {}'.format(self.dist_filename), f.write)
+        self.ftp.close()
 
     def put(self, filename):
-        ftp = FTP(self.host, self.user, self.passwd)
+        self.connect()
         with open(filename) as f:
-            ftp.storbinary('STOR {}'.format(self.dist_filename), f)
-        ftp.close()
+            self.ftp.storbinary('STOR {}'.format(self.dist_filename), f)
+        self.ftp.close()
+
+class SFTPLoader(DistantLoader):
+    """
+    A SFTPLoader is used to save and load a PasswordManager from a distant
+    file stored on a SFTP (FTP over SSH) server.
+    """
+
+    def __init__(self, loader, dist_filename, host, port=22, user=None,
+                 passwd=""):
+        """
+        Initializes the DistantLoader with the Loader to use to decode/encode
+        the distant file, a distant filename and with the connections
+        parameters to use.
+        """
+        DistantLoader.__init__(self, loader)
+        self.dist_filename = dist_filename
+        self.host = host
+        self.port = port
+        self.user = user if user else getpass.getuser()
+        self.passwd = passwd
+        self.get_hostkey()
+
+    def get_hostkey(self):
+        """
+        Try to get the hostkey from ~/.ssh/known_hosts or ~/ssh/known_hosts.
+        """
+        self.hostkeytype = None
+        self.hostkey = None
+        try:
+            path = os.path.expanduser("~")
+            file = "known_hosts"
+            join = os.path.join
+            host_keys = paramiko.util.load_host_keys(join(path, ".ssh", file))
+        except IOError:
+            try:
+                # for Windows
+                host_keys = paramiko.util.load_host_keys(join(path, "ssh",
+                                                              file))
+            except IOError:
+                host_keys = {}
+
+        if host_keys.has_key(self.host):
+            self.hostkeytype = host_keys[self.host].keys()[0]
+            self.hostkey = host_keys[self.host][hostkeytype]
+
+    def connect(self):
+        """
+        Establish the connection with the remote server.
+        """
+        t = paramiko.Transport((self.host, self.port))
+        t.connect(username=self.user, password=self.passwd,
+                  hostkey=self.hostkey)
+        self.sftp = paramiko.SFTPClient.from_transport(t)
+
+    def get(self, filename):
+        self.connect()
+        with open(filename, 'w') as f:
+            fdist = self.sftp.open(self.dist_filename)
+            shutil.copyfileobj(fdist, f)
+            fdist.close()
+        self.sftp.close()
+
+    def put(self, filename):
+        self.connect()
+        with open(filename) as f:
+            fdist = self.sftp.open(self.dist_filename, 'w')
+            shutil.copyfileobj(f, fdist)
+            fdist.close()
+        self.sftp.close()
