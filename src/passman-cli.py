@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #-*- coding: utf-8 -*-
 
-import argparse, sys, yaml, os.path, getpass, subprocess
+import argparse, sys, yaml, os.path, getpass, subprocess, shlex
 import loader, passman
 
 class CLI:
@@ -222,6 +222,11 @@ class CLI:
             self.manager.remove_entry(e)
         self.save_database()
 
+    def copy2clipboard(self, password):
+            p = subprocess.Popen(shlex.split(self.conf["clipboard_cmdline"]),
+                                 stdin=subprocess.PIPE)
+            p.communicate(password)
+
     def init_password(self):
         help="Gets the associated password of an entry."
         cmd_parser = self.cmd_parsers.add_parser("password", help=help)
@@ -257,9 +262,7 @@ class CLI:
                                       passphrase)
 
         if self.args.clipboard:
-            p = subprocess.Popen(["xclip", "-i", "-selection", "clipboard"],
-                                 stdin=subprocess.PIPE)
-            p.communicate(password)
+            self.copy2clipboard(password)
         else:
             print password
 
@@ -287,6 +290,7 @@ class CLI:
         generator_name = self.args.generator if self.args.generator \
                          else default_generator
         generator = manager.get_generator(generator_name)
+
         if self.args.entropy:
             length = max(generator.get_minimum_length(self.args.entropy),
                          self.args.length)
@@ -296,10 +300,9 @@ class CLI:
         password = generator.get_next_password(length)
         print "Random password of length {} (entropy={}):".format(length,
                                                                   entropy)
+
         if self.args.clipboard:
-            p = subprocess.Popen(["xclip", "-i", "-selection", "clipboard"],
-                                 stdin=subprocess.PIPE)
-            p.communicate(password)
+            self.copy2clipboard(password)
         else:
             print password
 
