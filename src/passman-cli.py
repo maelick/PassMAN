@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #-*- coding: utf-8 -*-
 
-import argparse, sys
+import argparse, sys, yaml, os.path
 import loader, passman
 
 class CLI:
@@ -12,30 +12,6 @@ class CLI:
     def init_parser(self):
         desc = "PassMAN Command Line Interface."
         parser = argparse.ArgumentParser(description=desc)
-        parser.add_argument("--db",
-                            help="The passwords database filename to use." + \
-                            "If not provided, will use configuration " + \
-                            "file ~/.passman/passman.conf")
-
-        type_group = parser.add_mutually_exclusive_group()
-        type_group.add_argument("--yaml",
-                                action="store_const",
-                                const="yaml",
-                                dest="db_type",
-                                help="Uses an unencrypted YAML file as " + \
-                                "password database (default).")
-        type_group.add_argument("--aes",
-                                action="store_const",
-                                const="aes",
-                                dest="db_type",
-                                help="Uses an AES-256-CBC encrypted and " + \
-                                "compressed YAML file as passwords database.")
-        type_group.add_argument("--gpg",
-                                action="store_const",
-                                const="gpg",
-                                dest="db_type",
-                                help="Uses a GPG encrypted and compressed " + \
-                                "YAML file as passwords database.")
 
         dtype_group = parser.add_mutually_exclusive_group()
         dtype_group.add_argument("--ftp",
@@ -51,22 +27,13 @@ class CLI:
                                  help="Retrieves/push the passwords " + \
                                  "database file using SSH.")
 
-        parser.add_argument("--host",
-                            help="The server's host.")
-        parser.add_argument("-p", "--port",
-                            action="store_true",
-                            help="The port to use to access the server.")
-        parser.add_argument("-u", "--username",
-                            help="The username to use to access the " + \
-                            "server.")
-        parser.add_argument("-f", "--file",
-                            help="The distant file to retrieve/push " + \
-                            "the database from/to.")
-
         parser.add_argument("-n", "--newdb",
                             action="store_true",
                             help="Creates a new password database file " + \
                             "instead of opening a new one.")
+        parser.add_argument("-c", "--conf",
+                            help="The configuration file to use (default " + \
+                            "is ~/.passman/passman.conf).")
         self.parser = parser
         self.init_commands()
 
@@ -106,8 +73,9 @@ class CLI:
         cmd_parser.set_defaults(action=self.retrieve_action)
 
     def retrieve_action(self):
-        print "retrieve"
-        pass # TODO
+        distant_loader = self.load_distant_loader()
+        distant_loader.load(self.conf["db"]["filename"])
+        print "Database retrieved."
 
     def init_push(self):
         help="Pushes the distant passwords database."
@@ -115,9 +83,10 @@ class CLI:
         cmd_parser.set_defaults(action=self.push_action)
 
     def push_action(self):
-        self.loader.save(self.manager, self.args.db)
-        print "Push completed."
-        pass # TODO
+        self.load_database()
+        distant_loader = self.load_distant_loader()
+        distant_loader.save(self.manager, self.conf["db"]["filename"])
+        print "Database pushed."
 
     def init_list(self):
         help="Lists (or filters) the entries of the database."
@@ -194,32 +163,46 @@ class CLI:
     def parse_args(self, args=None):
         self.args = self.parser.parse_args(args)
 
-    def load_database(self):
-        if self.args.db_type == "gpg":
+    def load_config(self):
+        dir = os.path.join(os.path.expanduser("~"), ".passman")
+        if not self.args.conf:
+            self.args.conf = os.path.join(dir, "passman.conf")
+        with open(self.args.conf) as f:
+            self.conf = yaml.load(f)
+        db_filename = os.path.expanduser(self.conf["db"]["filename"])
+        self.conf["db"]["filename"] = db_filename
+        self.conf["symbols_dir"] = os.path.expanduser(self.conf["symbols_dir"])
+
+    def load_loader(self):
+        if self.conf["db"]["format"] == "gpg":
             self.loader = loader.GPGLoader()
-        elif self.args.db_type == "aes":
+        elif self.conf["db"]["format"] == "aes":
             self.loader = loader.AESLoader()
         else:
             self.loader = loader.YAMLLoader()
 
+    def load_distant_loader(self):
+        if not self.args.dist_type:
+            self.args.dist_type = self.conf["default_distant"]
         if self.args.dist_type == "ftp":
-            self.loader = loader.FTPLoader(self.loader, self.args.file,
-                                           self.args.host,
-                                           self.args.username, "")
+            passwd = "MElz1Ous"
+            return loader.FTPLoader(self.loader, self.conf["ftp"]["filename"],
+                                    self.conf["ftp"]["host"],
+                                    self.conf["ftp"]["username"], passwd)
         elif self.args.dist_type == "ssh":
             pass # TODO
 
+    def load_database(self):
         if self.args.newdb:
-            self.manager = passman.PasswordManager(".")
-        elif self.args.db:
-            self.manager = self.loader.load(self.args.db)
+            self.manager = passman.PasswordManager(self.conf["symbols_dir"])
         else:
-            self.manager = None
+            self.manager = self.loader.load(self.conf["db"]["filename"])
 
 def main():
     cli = CLI()
     cli.parse_args()
-    cli.load_database()
+    cli.load_config()
+    cli.load_loader()
     cli.args.action()
     return 0
 

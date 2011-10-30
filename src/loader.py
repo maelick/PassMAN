@@ -121,7 +121,7 @@ class DistantLoader(Loader):
         and upload it to the distant location.
         The filename is used for the local temporary file.
         """
-        self.loader.save(filename, passphrase)
+        self.loader.save(manager, filename, passphrase)
         self.put(filename)
 
     def load(self, filename, passphrase=None):
@@ -131,7 +131,7 @@ class DistantLoader(Loader):
         The filename is used for the local temporary file.
         """
         self.get(filename)
-        return self.load(filename, passphrase)
+        return self.loader.load(filename, passphrase)
 
 
 class FTPLoader(DistantLoader):
@@ -154,12 +154,12 @@ class FTPLoader(DistantLoader):
 
     def get(self, filename):
         ftp = FTP(self.host, self.user, self.passwd)
-        with open(filename, 'w'):
-            ftp.retrbinary('RETR {}'.format(self.dist_filename), f)
+        with open(filename, 'w') as f:
+            ftp.retrbinary('RETR {}'.format(self.dist_filename), f.write)
         ftp.close()
 
     def put(self, filename):
         ftp = FTP(self.host, self.user, self.passwd)
-        with open(filename,):
+        with open(filename) as f:
             ftp.storbinary('STOR {}'.format(self.dist_filename), f)
         ftp.close()
