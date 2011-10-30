@@ -34,10 +34,18 @@ class PasswordGenerator:
         """
         pass
 
+    def get_next_password(self, n=15):
+        """
+        Returns the next password given of length n (15 by default) by
+        the generator.
+        This is an abstract method that needs to be overriden.
+        """
+        pass
+
     def get_password(self, name, username, nonce, passphrase):
         """
         Returns the next secure password of length n given by the generator
-        depending of the passphrase, name username and nonce.
+        depending of the passphrase, name, username and nonce.
         This is an abstract method that needs to be overriden.
         """
         pass
@@ -87,7 +95,7 @@ class PassmanGenerator(PasswordGenerator):
         """
         return random.choice(self.symbols)
 
-    def get_simple_password(self, n=15):
+    def get_next_password(self, n=15):
         """
         Returns the next password given of length n (15 by default) by
         the generator.
@@ -97,13 +105,13 @@ class PassmanGenerator(PasswordGenerator):
     def get_password(self, name, username, nonce, passphrase, n):
         """
         Returns the next secure password of length n given by the generator
-        depending of the passphrase, name username and nonce.
+        depending of the passphrase, name, username and nonce.
         """
         state = random.getstate()
         string = name + username + nonce + passphrase
         seed = hashlib.new(self.algo, string).digest()
         random.seed(seed)
-        password = self.get_simple_password(n)
+        password = self.get_next_password(n)
         random.setstate(state)
         return password
 
@@ -139,10 +147,19 @@ class OplopGenerator(PasswordGenerator):
         """
         return math.log(2 ** entropy / 10., 64) + 1
 
+    def get_next_password(self, n=8):
+        """
+        Returns the next password given of length n (8 by default) by
+        the generator.
+        """
+        username = "".join([chr(33 + random.randrange(94)) for i in xrange(n)])
+        passphrase = "".join([chr(33 + random.randrange(94)) for i in xrange(n)])
+        return self.get_password("", username, "", passphrase, n)
+
     def get_password(self, name, username, nonce, passphrase, n=8):
         """
         Returns the next secure password of length n given by the generator
-        depending of the passphrase, name username and nonce.
+        depending of the passphrase and username.
         """
         md5 = hashlib.md5()
         md5.update(passphrase)

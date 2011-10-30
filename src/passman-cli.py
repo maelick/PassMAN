@@ -58,15 +58,6 @@ class CLI:
         self.init_curses()
         self.init_gtk()
 
-    def init_generate(self):
-        help="Generates a random strong password."
-        cmd_parser = self.cmd_parsers.add_parser("generate", help=help)
-        cmd_parser.set_defaults(action=self.generate_action)
-
-    def generate_action(self):
-        print "generate"
-        pass # TODO
-
     def init_retrieve(self):
         help="Retrieves the distant passwords database."
         cmd_parser = self.cmd_parsers.add_parser("retrieve", help=help)
@@ -134,8 +125,7 @@ class CLI:
         help="Adds an entry to the passwords database."
         cmd_parser = self.cmd_parsers.add_parser("add", help=help)
         cmd_parser.set_defaults(action=self.add_action)
-        default_generator = self.conf["default_generator"]
-        cmd_parser.add_argument("--generator", default=default_generator],
+        cmd_parser.add_argument("--generator", default=None,
                                 help="The generator's name.")
         cmd_parser.add_argument("--name", required=True,
                                 help="The entry's name.")
@@ -147,7 +137,10 @@ class CLI:
 
     def add_action(self):
         self.load_database()
-        entry = passman.PasswordEntry(self.args.generator, self.args.name,
+        default_generator = self.conf["default_generator"]
+        generator = self.args.generator if self.args.generator \
+                    else default_generator
+        entry = passman.PasswordEntry(generator, self.args.name,
                                       self.args.username, self.args.comment,
                                       self.args.nonce, self.args.length,
                                       self.args.entropy)
@@ -245,8 +238,8 @@ class CLI:
                                 help="The index of the entry in the " + \
                                 "filtered list.")
         cmd_parser.add_argument("--clipboard", action="store_true",
-                                help="Copy password to clipboard instead " + \
-                                "printing it.")
+                                help="Copy password to system clipboard " + \
+                                "instead of printing it to stdout.")
 
     def password_action(self):
         self.load_database()
@@ -265,6 +258,44 @@ class CLI:
             passphrase = getpass.getpass(prompt)
             print entry.get_password(self.manager.generator_manager,
                                      passphrase)
+
+    def init_generate(self):
+        help="Generates a random strong password."
+        cmd_parser = self.cmd_parsers.add_parser("generate", help=help)
+        cmd_parser.set_defaults(action=self.generate_action)
+        cmd_parser.add_argument("-g", "--generator",
+                                default=None,
+                                help="The separator used to define " +
+                                "multiple regexp.")
+        cmd_parser.add_argument("--length", type=int, default=12,
+                                help="The minimum password's length " +
+                                "(default: 12).")
+        cmd_parser.add_argument("--entropy", type=int, default=None,
+                                help="The minimum password's entropy.")
+        cmd_parser.add_argument("--clipboard", action="store_true",
+                                help="Copy password to system clipboard " + \
+                                "instead of printing it to stdout.")
+
+    def generate_action(self):
+        self.load_database()
+        manager = self.manager.generator_manager
+        default_generator = self.conf["default_generator"]
+        generator_name = self.args.generator if self.args.generator \
+                         else default_generator
+        generator = manager.get_generator(generator_name)
+        if self.args.entropy:
+            length = max(generator.get_minimum_length(self.args.entropy),
+                         self.args.length)
+        else:
+            length = self.args.length
+        entropy = generator.get_entropy(length)
+        password = generator.get_next_password(length)
+        print "Random password of length {} (entropy={}):".format(length,
+                                                                  entropy)
+        if self.args.clipboard:
+            print "Copied to system clipboard" # TODO
+        else:
+            print password
 
     def init_curses(self):
         help="Opens the curses UI."
