@@ -20,21 +20,6 @@ class CLI:
         """
         desc = "PassMAN Command Line Interface."
         parser = argparse.ArgumentParser(description=desc)
-
-        dtype_group = parser.add_mutually_exclusive_group()
-        dtype_group.add_argument("--ftp",
-                                 action="store_const",
-                                 const="ftp",
-                                 dest="dist_type",
-                                 help="Retrieves/push the passwords " + \
-                                 "database file from/to a FTP.")
-        dtype_group.add_argument("--ssh",
-                                 action="store_const",
-                                 const="ssh",
-                                 dest="dist_type",
-                                 help="Retrieves/push the passwords " + \
-                                 "database file using SSH.")
-
         parser.add_argument("-n", "--newdb",
                             action="store_true",
                             help="Creates a new password database file " + \
@@ -69,6 +54,24 @@ class CLI:
         self.init_curses()
         self.init_gtk()
 
+    def distant_options(self, parser):
+        """
+        Initializes the distant transfer options for a specified parser.
+        """
+        dtype_group = parser.add_mutually_exclusive_group()
+        dtype_group.add_argument("--ftp",
+                                 action="store_const",
+                                 const="ftp",
+                                 dest="dist_type",
+                                 help="Retrieves/push the passwords " + \
+                                 "database file from/to a FTP.")
+        dtype_group.add_argument("--ssh",
+                                 action="store_const",
+                                 const="ssh",
+                                 dest="dist_type",
+                                 help="Retrieves/push the passwords " + \
+                                 "database file using SSH.")
+
     def init_retrieve(self):
         """
         Initializes the retireve command subparser options.
@@ -76,6 +79,7 @@ class CLI:
         help="Retrieves the distant passwords database."
         cmd_parser = self.cmd_parsers.add_parser("retrieve", help=help)
         cmd_parser.set_defaults(action=self.retrieve_action)
+        self.distant_options(cmd_parser)
 
     def retrieve_action(self):
         """
@@ -94,6 +98,7 @@ class CLI:
         help="Pushes the distant passwords database."
         cmd_parser = self.cmd_parsers.add_parser("push", help=help)
         cmd_parser.set_defaults(action=self.push_action)
+        self.distant_options(cmd_parser)
 
     def push_action(self):
         """

@@ -225,16 +225,10 @@ class SFTPLoader(DistantLoader):
 
     def get(self, filename):
         self.connect()
-        with open(filename, 'w') as f:
-            fdist = self.sftp.open(self.dist_filename)
-            shutil.copyfileobj(fdist, f)
-            fdist.close()
+        self.sftp.get(self.dist_filename, filename)
         self.sftp.close()
 
     def put(self, filename):
         self.connect()
-        with open(filename) as f:
-            fdist = self.sftp.open(self.dist_filename, 'w')
-            shutil.copyfileobj(f, fdist)
-            fdist.close()
+        self.sftp.put(filename, self.dist_filename)
         self.sftp.close()
