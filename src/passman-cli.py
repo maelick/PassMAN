@@ -74,7 +74,9 @@ class CLI:
 
     def retrieve_action(self):
         distant_loader = self.load_distant_loader()
-        distant_loader.load(self.conf["db"]["filename"])
+        passphrase = self.conf["db"]["passphrase"] \
+                     if self.conf["db"].has_key("passphrase") else None
+        distant_loader.load(self.conf["db"]["filename"], passphrase)
         print "Database retrieved."
 
     def init_push(self):
@@ -85,7 +87,10 @@ class CLI:
     def push_action(self):
         self.load_database()
         distant_loader = self.load_distant_loader()
-        distant_loader.save(self.manager, self.conf["db"]["filename"])
+        passphrase = self.conf["db"]["passphrase"] \
+                     if self.conf["db"].has_key("passphrase") else None
+        distant_loader.save(self.manager, self.conf["db"]["filename"],
+                            passphrase)
         print "Database pushed."
 
     def init_list(self):
@@ -314,10 +319,16 @@ class CLI:
         if self.args.newdb:
             self.manager = passman.PasswordManager(self.conf["symbols_dir"])
         else:
-            self.manager = self.loader.load(self.conf["db"]["filename"])
+            passphrase = self.conf["db"]["passphrase"] \
+                         if self.conf["db"].has_key("passphrase") else None
+            self.manager = self.loader.load(self.conf["db"]["filename"],
+                                            passphrase)
 
     def save_database(self):
-        self.loader.save(self.manager, self.conf["db"]["filename"])
+        passphrase = self.conf["db"]["passphrase"] \
+                     if self.conf["db"].has_key("passphrase") else None
+        self.loader.save(self.manager, self.conf["db"]["filename"],
+                         passphrase)
 
 def main():
     cli = CLI()
