@@ -1,5 +1,22 @@
 #!/usr/bin/env python
 #-*- coding: utf-8 -*-
+#
+# Copyright 2011 Maëlick Claes <himself@maelick.net>
+#
+# This file is part of PassML.
+#
+# PassML is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# PassML is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with PassML.  If not, see <http://www.gnu.org/licenses/>.
 
 import argparse, sys, yaml, os.path, getpass, subprocess, shlex
 import loader, passman
@@ -423,6 +440,8 @@ class CLI:
         Load the configuration from ~/.passman/passman.yml.
         """
         dir = os.path.join(os.path.expanduser("~"), ".passman")
+        if sys.platform == "win32" and not os.path.exists(dir):
+            dir = os.path.join(os.path.expanduser("~"), "passman")
         if not self.args.conf:
             self.args.conf = os.path.join(dir, "passman.yml")
         with open(self.args.conf) as f:

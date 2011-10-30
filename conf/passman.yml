@@ -1,0 +1,24 @@
+### PassMAN Configuration File ###
+
+default_distant: ftp
+default_generator: sha512:ascii
+symbols_dir: ~/.passman/symbols
+
+#clipboard_cmdline: "xclip -i -selection clipboard"
+clipboard_cmdline: "xsel -bi"
+
+db:
+    filename: ~/.passman/passman.db
+    format: aes
+    passphrase: pass
+
+ssh:
+    host: localhost
+    port: 22
+    username: maelick
+    filename: /home/maelick/passman.db
+
+ftp:
+    host: ftp.60free.ovh.org
+    username: mael-test
+    filename: passman.db

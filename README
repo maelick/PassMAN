@@ -1,0 +1,123 @@
+=== PassMAN ===
+
+https://launchpad.net/passman
+
+PassMAN is a password mannager that aims to be secure without storing any
+passwords on disk. This is achieved by using a hash function over a set
+of informations and a master passphrase to generate a near unique password
+for each websites. It is similar to other softwares like oplop
+(http://code.google.com/p/oplop) or SuperGenPass (http://supergenpass.com).
+
+PassMAN stores a database containing for each site an entry with a name,
+a username, a nonce, a comment, a length or an entropy and some tags.
+The password is generated using a concatenation of the name, the username,
+the nonce and the master passphrase that keeps most of the secret.
+The comment is used as a memo to keep additional informations about the entry
+and the length/(bit) entropy is used to control the strength of the
+passwords. Tags are used to easily filter the list of entries.
+
+While it doesn't contain any password, the resulting database can be
+encrypted using AES-256 or GnuPG (feature planned) and then stored remotely
+using (S)FTP.
+
+
+
+=== REQUIRED ===
+
+Python 2.7
+PyYAML
+OpenSSL for AES encryption
+paramiko for SFTP functionality
+
+
+
+=== INSTALLATION ===
+
+Put all the .py files from src folder where you want and optionally create
+a symbolic link in a folder that is in your PATH variable.
+For example:
+mkdir ~/passman
+cp src/*.py ~/passman
+ln -s ~/passman/passman-cli.py ~/bin/passman
+
+And in your ~/.bashrc (or equivalent):
+export $PATH="$PATH:$HOME/bin"
+
+Put all the files from conf folder into ~/.passman.
+For example:
+cp -r conf ~/.passman
+
+For Windows copy the .py where you want and create a link.
+Copy the content of conf directory into ~/passman.
+
+Installation scripts will be provided in future versions.
+
+
+
+=== CONFIGURATION ===
+
+Additional dictionaries can be added in ~/.passman/symbols.
+~/.passman/passman.yml is the main configuration file and is encoded with
+YAML.
+
+Options for ~/.passman/passman.yml:
+
+default_distant: the default protocol used to store remotely the database.
+                 Can be either ftp or ssh (for sftp).
+default_generator: the default generator to use when generating random
+                   passwords or adding a new entry in the database.
+                   See below for more informations
+symbols_dir: the directory in which the dictionaries are store.
+
+clipboard_cmdlin: the command to use to store a password into the clipboard.
+                  The password will be passed on the stdin of the command's
+                  process.
+
+db:
+    filename: the filename of the local database file.
+    format: the format used to save the database. May be yaml, aes, gnupg.
+            aes encryption also uses bzip2 compression and YAML. gnupg is not
+            yet implemented but will also use bzip2 and YAML.
+    passphrase: the passphrase for the encryption algorithm if needed.
+
+ssh:
+    host: hostname of the SSH server.
+    port: port of the SSH server.
+    username: user name on the SSH server.
+    filename: remote file on the SSH server.
+
+ftp:
+    host: hostname of the FTP server.
+    username: user name on the FTP server.
+    filename: remote file on the FTP server.
+
+
+
+=== Generator name format ===
+
+A generator is identified by a string representation. It uses the form:
+algo_name:dictionary
+algo_name is the name of the hash algorithm name (e.g. md5, sha256,
+sha512, etc). sha512 is recommended.
+The dictonary is the dictionary filename. It may be a file containing
+a character on each line or a list of words to be used as a diceware
+(see http://www.diceware.com). In the last case, the file must start with
+"diceware" otherwise there will be no space between words in the resulting
+diceware password.
+
+Additional "third-party" algorithms are (or will be) also impleted and can
+be used by simply using their name.
+
+Currently implemented third-party algorithms:
+  * oplop
+
+
+
+=== Credits ===
+
+The software is licensed under the GNU General Public License v3, see
+LICENSE file.
+Diceware lists get credits of their respective authors (see
+http://world.std.com/~reinhold/diceware.html#languages).
+Third-party algorithms are based on:
+  * http://code.google.com/p/oplop for oplop
