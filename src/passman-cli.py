@@ -371,7 +371,7 @@ class CLI:
         else:
             length = self.args.length
         entropy = generator.get_entropy(length)
-        password = generator.get_next_password(length)
+        password = generator.get_random_password(length)
         print "Random password of length {} (entropy={}):".format(length,
                                                                   entropy)
 

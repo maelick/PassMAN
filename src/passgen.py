@@ -42,6 +42,17 @@ class PasswordGenerator:
         """
         pass
 
+    def get_random_password(self, n=15):
+        """
+        Returns a random password of length n (15 by default).
+        """
+        state = random.getstate()
+        seed = os.urandom
+        random.seed(seed)
+        password = self.get_next_password(n)
+        random.setstate(state)
+        return password
+
     def get_password(self, name, username, nonce, passphrase):
         """
         Returns the next secure password of length n given by the generator
@@ -62,7 +73,7 @@ class PassmanGenerator(PasswordGenerator):
     """
     yaml_tag = u'!PassmanGenerator'
 
-    def __init__(self, filename, algo="sha512"):
+    def __init__(self, filename, algo="sha512", sep=""):
         """
         Initializes the generator with:
           * the name of the file with each line containing each symbol
@@ -74,7 +85,7 @@ class PassmanGenerator(PasswordGenerator):
         with open(filename) as f:
             self.symbols = [l.strip() for l in f.readlines()
                             if len(l.strip()) > 0]
-        self.sep = ""
+        self.sep = sep
         self.algo = algo
 
     def get_entropy(self, length):
@@ -218,6 +229,7 @@ class GeneratorManager:
         else:
             if name not in self.generators:
                 algo, filename = name.split(":", 1)
+                sep = " " if filename.startswith("diceware") else ""
                 filename = os.path.join(self.directory, filename)
-                self.generators[name] = PassmanGenerator(filename, algo)
+                self.generators[name] = PassmanGenerator(filename, algo, sep)
             return self.generators[name]
