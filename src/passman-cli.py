@@ -15,7 +15,7 @@ class CLI:
         parser.add_argument("--db",
                             help="The passwords database filename to use." + \
                             "If not provided, will use configuration " + \
-                            "file ~/.passman")
+                            "file ~/.passman/passman.conf")
 
         type_group = parser.add_mutually_exclusive_group()
         type_group.add_argument("--yaml",
@@ -115,7 +115,8 @@ class CLI:
         cmd_parser.set_defaults(action=self.push_action)
 
     def push_action(self):
-        print "push"
+        self.loader.save(self.manager, self.args.db)
+        print "Push completed."
         pass # TODO
 
     def init_list(self):
@@ -209,7 +210,7 @@ class CLI:
             pass # TODO
 
         if self.args.newdb:
-            self.manager = passman.PasswordManager()
+            self.manager = passman.PasswordManager(".")
         elif self.args.db:
             self.manager = self.loader.load(self.args.db)
         else:
