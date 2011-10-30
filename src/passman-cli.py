@@ -89,22 +89,40 @@ class CLI:
         print "Database pushed."
 
     def init_list(self):
-        help="Lists (or filters) the entries of the database."
+        help="Lists the entries of the database."
         cmd_parser = self.cmd_parsers.add_parser("list", help=help)
         cmd_parser.set_defaults(action=self.list_action)
+        cmd_parser.add_argument("-t", "--tag",
+                                help="The tag of the entries to list.")
 
     def list_action(self):
-        print "list"
-        pass # TODO
+        self.load_database()
+        entries = self.manager.get_entries(self.args.tag)
+        for e in entries:
+            print e
 
     def init_add(self):
         help="Adds an entry to the passwords database."
         cmd_parser = self.cmd_parsers.add_parser("add", help=help)
         cmd_parser.set_defaults(action=self.add_action)
+        cmd_parser.add_argument("--generator", required=True,
+                                help="The generator's name.")
+        cmd_parser.add_argument("--name", required=True,
+                                help="The entry's name.")
+        cmd_parser.add_argument("--username", required=True)
+        cmd_parser.add_argument("--comment", default="")
+        cmd_parser.add_argument("--nonce", default="")
+        cmd_parser.add_argument("--length", default=15)
+        cmd_parser.add_argument("--entropy", default=None)
 
     def add_action(self):
-        print "add"
-        pass # TODO
+        self.load_database()
+        entry = passman.PasswordEntry(self.args.generator, self.args.name,
+                                      self.args.username, self.args.comment,
+                                      self.args.nonce, self.args.length,
+                                      self.args.entropy)
+        self.manager.add_entry(entry)
+        self.save_database()
 
     def init_add_tag(self):
         help="Adds a tag to the matching entries."
@@ -197,6 +215,9 @@ class CLI:
             self.manager = passman.PasswordManager(self.conf["symbols_dir"])
         else:
             self.manager = self.loader.load(self.conf["db"]["filename"])
+
+    def save_database(self):
+        self.loader.save(self.manager, self.conf["db"]["filename"])
 
 def main():
     cli = CLI()
