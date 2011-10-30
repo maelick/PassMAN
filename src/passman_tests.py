@@ -20,6 +20,12 @@ class TestPasswordEntry(unittest.TestCase):
     def tearDown(self):
         os.remove("test_symbols")
 
+    def test_eq(self):
+        entry2 = copy.copy(self.entry)
+        entry2.username = "username2"
+        self.assertNotEqual(self.entry, entry2)
+        self.assertEqual(self.entry, copy.copy(self.entry))
+
     def test_match(self):
         self.assertTrue(self.entry.match(["about"]))
         self.assertTrue(self.entry.match(["n.m"]))
@@ -44,17 +50,20 @@ class TestPasswordManager(unittest.TestCase):
     def tearDown(self):
         os.remove("test_symbols")
 
-    def test_eq(self):
-        self.assertNotEqual(self.entry1, self.entry2)
-        self.assertEqual(self.entry1, copy.copy(self.entry1))
-
     def test_add_entry(self):
-        self.manager.add_entry(self.entry1)
+        self.manager.set_entry(self.entry1)
         self.manager.set_entry_tags(self.entry1, ["tag1", "tag2"])
-        self.manager.add_entry(self.entry2)
+        self.manager.set_entry(self.entry2)
         self.manager.set_entry_tags(self.entry2, ["tag2"])
-        self.manager.add_entry(self.entry3)
+        self.manager.set_entry(self.entry3)
         self.manager.set_entry_tags(self.entry3, ["tag3"])
+
+    def test_set_entry(self):
+        self.test_add_entry()
+        entry = copy.copy(self.entry2)
+        entry.username = "test"
+        self.manager.set_entry(entry)
+        self.assertEqual(self.manager.get_entry("name2"), entry)
 
     def test_get_entries(self):
         self.test_add_entry()
@@ -66,6 +75,10 @@ class TestPasswordManager(unittest.TestCase):
                               [self.entry1, self.entry2])
         self.assertItemsEqual(self.manager.get_entries("tag3"),
                               [self.entry3])
+
+    def test_get_entry(self):
+        self.test_add_entry()
+        self.assertEqual(self.manager.get_entry("name2"), self.entry2)
 
     def test_remove_entry(self):
         self.test_add_entry()

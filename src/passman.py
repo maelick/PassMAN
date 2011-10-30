@@ -54,12 +54,15 @@ class PasswordEntry(yaml.YAMLObject):
         generator = generator_manager.get_generator(self.generator)
         return max(generator.get_entropy(self.length), self.entropy)
 
-    def __hash__(self):
-        return 0
-
     def __eq__(self, other):
         return isinstance(other, PasswordEntry) and \
-               self.name == other.name
+               self.generator == other.generator and \
+               self.name == other.name and \
+               self.username == other.username and \
+               self.nonce == other.nonce and \
+               self.comment == other.comment and \
+               self.length == other.length and \
+               self.entropy == other.entropy
 
     def __str__(self):
         return "{} ({}): {} ({}): {}: {}/{}".format(self.name, self.generator,
@@ -123,30 +126,23 @@ class PasswordManager(yaml.YAMLObject):
         else:
             return [e for e in self.passwords if tag in e.tags]
 
-    def get_entry(self, name, tag=None, filter=False):
+    def get_entry(self, name):
         """
-        Returns an entry.
-        If name is a string, returns the entry matching the name.
-        If name is an integer, name is the entry's list index.
-        The list may be the complete passwords list, a tag list or a
-        filter-based list depending on the options.
+        Returns an entry which the name match.
         """
-        if type(name) is int:
-            entries = self.filter(tag) if filter else self.get_entries(tag)
-            return entries[name]
-        else:
-            for e in self.passwords:
-                if e.name == name:
-                    return e
+        for e in self.passwords:
+            if e.name == name:
+                return e
 
     def set_entry(self, entry):
         """
         Adds a PasswordEntry.
         """
-        if entry in self.passwords:
-            self.passwords[self.passwords.index(entry)] = entry
-        else:
-            self.passwords.append(entry)
+        for i, e in enumerate(self.passwords):
+            if e.name == entry.name:
+                self.passwords[i] = entry
+                return
+        self.passwords.append(entry)
 
     def remove_entry(self, entry):
         """
