@@ -88,6 +88,17 @@ class TestPasswordManager(unittest.TestCase):
         self.assertEqual(len(self.manager.passwords), 0)
         self.assertEqual(len(self.manager.tags), 0)
 
+    def test_add_tag(self):
+        self.test_add_entry()
+        self.manager.add_tag(self.entry2, "tag1")
+        self.assertEqual([self.entry1, self.entry2],
+                         self.manager.get_entries("tag1"))
+
+    def test_remove_tag(self):
+        self.test_add_entry()
+        self.manager.remove_tag(self.entry1, "tag2")
+        self.assertEqual([self.entry2], self.manager.get_entries("tag2"))
+
     def test_change_tags(self):
         self.test_add_entry()
         self.manager.set_entry_tags(self.entry1, ["tag1"])

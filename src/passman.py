@@ -65,10 +65,10 @@ class PasswordEntry(yaml.YAMLObject):
                self.entropy == other.entropy
 
     def __str__(self):
-        return "{} ({}): {} ({}): {}: {}/{}".format(self.name, self.generator,
-                                                    self.username, self.nonce,
-                                                    self.comment, self.length,
-                                                    self.entropy)
+        s1 = "{} ({}): {}".format(self.name, self.generator, self.username)
+        s2 = "({})".format(self.nonce) if self.nonce else ""
+        s3 = "({})".format(self.nonce) if self.nonce else ""
+        return "{} {} {}: {}".format(s1, s2, s3, self.length)
 
     def match_re(self, regex):
         """
@@ -151,11 +151,25 @@ class PasswordManager(yaml.YAMLObject):
         self.passwords.remove(entry)
         self.compute_tags()
 
+    def add_tag(self, entry, tag):
+        """
+        Adds a tag to an entry.
+        """
+        entry.tags.add(tag)
+        self.compute_tags()
+
+    def remove_tag(self, entry, tag):
+        """
+        Removes a tag from an entry.
+        """
+        entry.tags.remove(tag)
+        self.compute_tags()
+
     def set_entry_tags(self, entry, tags):
         """
         Modifies the tags of an entry.
         """
-        entry.tags = tags
+        entry.tags = set(tags)
         self.compute_tags()
 
     def get_tags(self):
