@@ -203,10 +203,25 @@ class CLI:
         help="Removes one entry of the database."
         cmd_parser = self.cmd_parsers.add_parser("remove", help=help)
         cmd_parser.set_defaults(action=self.remove_action)
+        group = cmd_parser.add_mutually_exclusive_group()
+        group.add_argument("-t", "--tag",
+                           help="The tag of the entries to list.")
+        group.add_argument("-f", "--filter",
+                           help="Regexp used to filter the list to print.")
+        cmd_parser.add_argument("--sep", default="|",
+                                help="The separator used to define " +
+                                "multiple regexp.")
 
     def remove_action(self):
-        print "remove"
-        pass # TODO
+        self.load_database()
+        if self.args.filter:
+            keywords = self.args.filter.split(self.args.sep)
+            entries = self.manager.filter(keywords)
+        else:
+            entries = self.manager.get_entries(self.args.tag)
+        for e in entries:
+            self.manager.remove_entry(e)
+        self.save_database()
 
     def init_password(self):
         help="Gets the associated password of an entry."
