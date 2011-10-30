@@ -100,7 +100,7 @@ class PasswordManager(yaml.YAMLObject):
         """
         Initializes an empty manager.
         """
-        self.passwords = set()
+        self.passwords = []
         self.tags = set()
         self.generator_manager = passgen.GeneratorManager(directory)
 
@@ -119,15 +119,34 @@ class PasswordManager(yaml.YAMLObject):
         to get only the entries associated with this tag.
         """
         if tag is None:
-            return list(self.passwords)
+            return self.passwords
         else:
             return [e for e in self.passwords if tag in e.tags]
 
-    def add_entry(self, entry):
+    def get_entry(self, name, tag=None, filter=False):
+        """
+        Returns an entry.
+        If name is a string, returns the entry matching the name.
+        If name is an integer, name is the entry's list index.
+        The list may be the complete passwords list, a tag list or a
+        filter-based list depending on the options.
+        """
+        if type(name) is int:
+            entries = self.filter(tag) if filter else self.get_entries(tag)
+            return entries[name]
+        else:
+            for e in self.passwords:
+                if e.name == name:
+                    return e
+
+    def set_entry(self, entry):
         """
         Adds a PasswordEntry.
         """
-        self.passwords.add(entry)
+        if entry in self.passwords:
+            self.passwords[self.passwords.index(entry)] = entry
+        else:
+            self.passwords.append(entry)
 
     def remove_entry(self, entry):
         """
