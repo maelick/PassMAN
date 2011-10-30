@@ -28,6 +28,10 @@ class TestOplopGenerator(unittest.TestCase):
     def test_secure_password(self):
         secure_password = self.generator.get_password("name", "username",
                                                       "nonce", "passphrase",
+                                                      8)
+        self.assertEqual(secure_password, "6rWI_aOE")
+        secure_password = self.generator.get_password("name", "username",
+                                                      "nonce", "passphrase",
                                                       15)
         self.assertEqual(secure_password, "6rWI_aOE3JHXjh0")
         secure_password = self.generator.get_password("name2", "username",
@@ -55,7 +59,7 @@ class TestPassmanGenerator(unittest.TestCase):
         self.assertEqual(symbol, 'p')
 
     def test_simple_password(self):
-        password = self.generator.get_simple_password()
+        password = self.generator.get_next_password()
         self.assertEqual(password, "phH9QGj=MWvP;h[")
 
     def test_entropy(self):
@@ -74,8 +78,8 @@ class TestPassmanGenerator(unittest.TestCase):
         self.assertEqual(secure_password, "{H~Won5+t@oN\\Qf")
 
         # Test if seed has been correctly set back
-        simple_password = self.generator.get_simple_password()
-        self.assertEqual(simple_password, "phH9QGj=MWvP;h[")
+        next_password = self.generator.get_next_password()
+        self.assertEqual(next_password, "phH9QGj=MWvP;h[")
 
 if __name__ == '__main__':
     unittest.main()
