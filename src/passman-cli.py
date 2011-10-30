@@ -327,7 +327,7 @@ class CLI:
     def load_config(self):
         dir = os.path.join(os.path.expanduser("~"), ".passman")
         if not self.args.conf:
-            self.args.conf = os.path.join(dir, "passman.conf")
+            self.args.conf = os.path.join(dir, "passman.yml")
         with open(self.args.conf) as f:
             self.conf = yaml.load(f)
         db_filename = os.path.expanduser(self.conf["db"]["filename"])
