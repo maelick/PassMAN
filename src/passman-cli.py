@@ -5,11 +5,19 @@ import argparse, sys, yaml, os.path, getpass, subprocess, shlex
 import loader, passman
 
 class CLI:
+    """
+    This class is the command line interface with PassMAN.
+    It parses command line arguments to manipulate PassMAN and to open
+    the curses and GTK UI.
+    """
     def __init__(self):
         self.loader = None
         self.init_parser()
 
     def init_parser(self):
+        """
+        Initialize the parser global options.
+        """
         desc = "PassMAN Command Line Interface."
         parser = argparse.ArgumentParser(description=desc)
 
@@ -38,6 +46,9 @@ class CLI:
         self.init_commands()
 
     def init_commands(self):
+        """
+        Initializes the commands subparsers.
+        """
         title = "PassMAN-CLI Action"
         desc = "The action to do on the password database."
         help = "Use -h or --help with the action for more details."
@@ -59,11 +70,17 @@ class CLI:
         self.init_gtk()
 
     def init_retrieve(self):
+        """
+        Initializes the retireve command subparser options.
+        """
         help="Retrieves the distant passwords database."
         cmd_parser = self.cmd_parsers.add_parser("retrieve", help=help)
         cmd_parser.set_defaults(action=self.retrieve_action)
 
     def retrieve_action(self):
+        """
+        Function called when the retrieve command is passed as argument.
+        """
         distant_loader = self.load_distant_loader()
         passphrase = self.conf["db"]["passphrase"] \
                      if self.conf["db"].has_key("passphrase") else None
@@ -71,11 +88,17 @@ class CLI:
         print "Database retrieved."
 
     def init_push(self):
+        """
+        Initializes the push command subparser options.
+        """
         help="Pushes the distant passwords database."
         cmd_parser = self.cmd_parsers.add_parser("push", help=help)
         cmd_parser.set_defaults(action=self.push_action)
 
     def push_action(self):
+        """
+        Function called when the push command is passed as argument.
+        """
         self.load_database()
         distant_loader = self.load_distant_loader()
         passphrase = self.conf["db"]["passphrase"] \
@@ -85,6 +108,9 @@ class CLI:
         print "Database pushed."
 
     def init_list(self):
+        """
+        Initializes the list command subparser options.
+        """
         help="Lists the entries of the database."
         cmd_parser = self.cmd_parsers.add_parser("list", help=help)
         cmd_parser.set_defaults(action=self.list_action)
@@ -101,6 +127,9 @@ class CLI:
                                 help="Computes the entries entropy.")
 
     def list_action(self):
+        """
+        Function called when the list command is passed as argument.
+        """
         self.load_database()
         if self.args.filter:
             keywords = self.args.filter.split(self.args.sep)
@@ -122,6 +151,9 @@ class CLI:
                 print s
 
     def init_add(self):
+        """
+        Initializes the add command subparser options.
+        """
         help="Adds an entry to the passwords database."
         cmd_parser = self.cmd_parsers.add_parser("add", help=help)
         cmd_parser.set_defaults(action=self.add_action)
@@ -136,6 +168,9 @@ class CLI:
         cmd_parser.add_argument("--entropy", type=int, default=None)
 
     def add_action(self):
+        """
+        Function called when the add command is passed as argument.
+        """
         self.load_database()
         default_generator = self.conf["default_generator"]
         generator = self.args.generator if self.args.generator \
@@ -149,6 +184,9 @@ class CLI:
         self.save_database()
 
     def init_add_tag(self):
+        """
+        Initializes the add_tag command subparser options.
+        """
         help="Adds a tag to the matching entries."
         cmd_parser = self.cmd_parsers.add_parser("add_tag", help=help)
         cmd_parser.set_defaults(action=self.add_tag_action)
@@ -162,6 +200,9 @@ class CLI:
                                 help="The tag to add.")
 
     def add_tag_action(self):
+        """
+        Function called when the add_tag command is passed as argument.
+        """
         self.load_database()
         if self.args.filter:
             keywords = self.args.filter.split(self.args.sep)
@@ -174,6 +215,9 @@ class CLI:
         self.save_database()
 
     def init_remove_tag(self):
+        """
+        Initializes the remove_tag command subparser options.
+        """
         help="Removes a tag from the matching entries."
         cmd_parser = self.cmd_parsers.add_parser("remove_tag", help=help)
         cmd_parser.set_defaults(action=self.remove_tag_action)
@@ -187,6 +231,9 @@ class CLI:
                                 help="The tag to add.")
 
     def remove_tag_action(self):
+        """
+        Function called when the remove_tag command is passed as argument.
+        """
         self.load_database()
         if self.args.filter:
             keywords = self.args.filter.split(self.args.sep)
@@ -199,6 +246,9 @@ class CLI:
         self.save_database()
 
     def init_remove(self):
+        """
+        Initializes the remove command subparser options.
+        """
         help="Removes one entry of the database."
         cmd_parser = self.cmd_parsers.add_parser("remove", help=help)
         cmd_parser.set_defaults(action=self.remove_action)
@@ -212,6 +262,9 @@ class CLI:
                                 "multiple regexp.")
 
     def remove_action(self):
+        """
+        Function called when the remove command is passed as argument.
+        """
         self.load_database()
         if self.args.filter:
             keywords = self.args.filter.split(self.args.sep)
@@ -223,11 +276,18 @@ class CLI:
         self.save_database()
 
     def copy2clipboard(self, password):
-            p = subprocess.Popen(shlex.split(self.conf["clipboard_cmdline"]),
-                                 stdin=subprocess.PIPE)
-            p.communicate(password)
+        """
+        Copies a password into the system clipboard using a third party
+        tool like xclip or xsel.
+        """
+        p = subprocess.Popen(shlex.split(self.conf["clipboard_cmdline"]),
+                             stdin=subprocess.PIPE)
+        p.communicate(password)
 
     def init_password(self):
+        """
+        Initializes the password command subparser options.
+        """
         help="Gets the associated password of an entry."
         cmd_parser = self.cmd_parsers.add_parser("password", help=help)
         cmd_parser.set_defaults(action=self.password_action)
@@ -247,6 +307,9 @@ class CLI:
                                 "instead of printing it to stdout.")
 
     def password_action(self):
+        """
+        Function called when the password command is passed as argument.
+        """
         self.load_database()
         if self.args.filter:
             keywords = self.args.filter.split(self.args.sep)
@@ -267,6 +330,9 @@ class CLI:
             print password
 
     def init_generate(self):
+        """
+        Initializes the generate command subparser options.
+        """
         help="Generates a random strong password."
         cmd_parser = self.cmd_parsers.add_parser("generate", help=help)
         cmd_parser.set_defaults(action=self.generate_action)
@@ -284,6 +350,9 @@ class CLI:
                                 "instead of printing it to stdout.")
 
     def generate_action(self):
+        """
+        Function called when the generate command is passed as argument.
+        """
         self.load_database()
         manager = self.manager.generator_manager
         default_generator = self.conf["default_generator"]
@@ -307,27 +376,47 @@ class CLI:
             print password
 
     def init_curses(self):
+        """
+        Initializes the curses command subparser options.
+        """
         help="Opens the curses UI."
         cmd_parser = self.cmd_parsers.add_parser("curses", help=help)
         cmd_parser.set_defaults(action=self.curses_action)
 
     def curses_action(self):
+        """
+        Function called when the curses command is passed as argument.
+        Starts the curses UI.
+        """
         print "curses"
         pass # TODO
 
     def init_gtk(self):
+        """
+        Initializes the gtk command subparser options.
+        """
         help="Opens the GTK GUI."
         cmd_parser = self.cmd_parsers.add_parser("gtk", help=help)
         cmd_parser.set_defaults(action=self.gtk_action)
 
     def gtk_action(self):
+        """
+        Function called when the push command is passed as argument.
+        Starts de GTK GUI.
+        """
         print "gtk"
         pass # TODO
 
     def parse_args(self, args=None):
+        """
+        Parses the arguments.
+        """
         self.args = self.parser.parse_args(args)
 
     def load_config(self):
+        """
+        Load the configuration from ~/.passman/passman.yml.
+        """
         dir = os.path.join(os.path.expanduser("~"), ".passman")
         if not self.args.conf:
             self.args.conf = os.path.join(dir, "passman.yml")
@@ -338,6 +427,9 @@ class CLI:
         self.conf["symbols_dir"] = os.path.expanduser(self.conf["symbols_dir"])
 
     def load_loader(self):
+        """
+        Loads the local loader.
+        """
         if self.conf["db"]["format"] == "gpg":
             self.loader = loader.GPGLoader()
         elif self.conf["db"]["format"] == "aes":
@@ -346,6 +438,9 @@ class CLI:
             self.loader = loader.YAMLLoader()
 
     def load_distant_loader(self):
+        """
+        Loads the distant loader.
+        """
         if not self.args.dist_type:
             self.args.dist_type = self.conf["default_distant"]
         if self.args.dist_type == "ftp":
@@ -357,6 +452,9 @@ class CLI:
             pass # TODO
 
     def load_database(self):
+        """
+        Loads the (local) password database.
+        """
         if self.args.newdb:
             self.manager = passman.PasswordManager(self.conf["symbols_dir"])
         else:
@@ -366,6 +464,9 @@ class CLI:
                                             passphrase)
 
     def save_database(self):
+        """
+        Saves the (local) password database.
+        """
         passphrase = self.conf["db"]["passphrase"] \
                      if self.conf["db"].has_key("passphrase") else None
         self.loader.save(self.manager, self.conf["db"]["filename"],
