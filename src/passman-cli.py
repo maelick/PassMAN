@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #-*- coding: utf-8 -*-
 
-import argparse, sys, yaml, os.path
+import argparse, sys, yaml, os.path, getpass
 import loader, passman
 
 class CLI:
@@ -227,10 +227,38 @@ class CLI:
         help="Gets the associated password of an entry."
         cmd_parser = self.cmd_parsers.add_parser("password", help=help)
         cmd_parser.set_defaults(action=self.password_action)
+        group = cmd_parser.add_mutually_exclusive_group()
+        group.add_argument("-t", "--tag",
+                           help="The tag of the entries to list.")
+        group.add_argument("-f", "--filter",
+                           help="Regexp used to filter the list to print.")
+        cmd_parser.add_argument("--sep", default="|",
+                                help="The separator used to define " +
+                                "multiple regexp.")
+        cmd_parser.add_argument("-i", "--index", type=int, default=0,
+                                help="The index of the entry in the " + \
+                                "filtered list.")
+        cmd_parser.add_argument("--clipboard", action="store_true",
+                                help="Copy password to clipboard instead " + \
+                                "printing it.")
 
     def password_action(self):
-        print "password"
-        pass # TODO
+        self.load_database()
+        if self.args.filter:
+            keywords = self.args.filter.split(self.args.sep)
+            entries = self.manager.filter(keywords)
+        else:
+            entries = self.manager.get_entries()
+
+        entry = entries[self.args.index]
+        print "Password for entry: {}".format(entry)
+        if self.args.clipboard:
+            pass # TODO
+        else:
+            prompt = "Please enter the master passphrase: "
+            passphrase = getpass.getpass(prompt)
+            print entry.get_password(self.manager.generator_manager,
+                                     passphrase)
 
     def init_curses(self):
         help="Opens the curses UI."
