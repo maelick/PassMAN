@@ -56,11 +56,6 @@ class TestPasswordManager(unittest.TestCase):
         self.manager.add_entry(self.entry3)
         self.manager.set_entry_tags(self.entry3, ["tag3"])
 
-    def test_dump(self):
-        self.test_add_entry()
-        import yaml
-        print yaml.dump(self.manager)
-
     def test_get_entries(self):
         self.test_add_entry()
         self.assertItemsEqual(self.manager.get_entries(),
