@@ -73,6 +73,12 @@ clipboard_cmdlin: the command to use to store a password into the clipboard.
                   The password will be passed on the stdin of the command's
                   process.
 
+default_password_length:
+    normal: default password length for normal passwords
+    diceware: default password length for diceware passwords
+    algorithm_name: default password for passwords generated with
+                    algorithm_name
+
 db:
     filename: the filename of the local database file.
     format: the format used to save the database. May be yaml, aes, gnupg.

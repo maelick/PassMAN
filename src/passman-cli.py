@@ -186,8 +186,8 @@ class CLI:
         cmd_parser.add_argument("--username", required=True)
         cmd_parser.add_argument("--comment", default="")
         cmd_parser.add_argument("--nonce", default="")
-        cmd_parser.add_argument("--length", type=int, default=15)
-        cmd_parser.add_argument("--entropy", type=int, default=None)
+        cmd_parser.add_argument("--length", type=int, default=-1)
+        cmd_parser.add_argument("--entropy", type=float, default=None)
 
     def add_action(self):
         """
@@ -197,9 +197,20 @@ class CLI:
         default_generator = self.conf["default_generator"]
         generator = self.args.generator if self.args.generator \
                     else default_generator
+
+        if self.args.entropy:
+            length = max(generator.get_minimum_length(self.args.entropy),
+                         self.args.length)
+        elif self.conf["default_password_length"].has_key(generator):
+            length = self.conf["default_password_length"][generator]
+        elif generator.split(":")[1].startswith("diceware"):
+            length = self.conf["default_password_length"]["diceware"]
+        else:
+            length = self.conf["default_password_length"]["normal"]
+
         entry = passman.PasswordEntry(generator, self.args.name,
                                       self.args.username, self.args.comment,
-                                      self.args.nonce, self.args.length,
+                                      self.args.nonce, length,
                                       self.args.entropy)
         self.manager.set_entry(entry)
         entry.get_password(self.manager.generator_manager, "")
@@ -362,10 +373,10 @@ class CLI:
                                 default=None,
                                 help="The separator used to define " +
                                 "multiple regexp.")
-        cmd_parser.add_argument("--length", type=int, default=12,
+        cmd_parser.add_argument("--length", type=int, default=-1,
                                 help="The minimum password's length " +
                                 "(default: 12).")
-        cmd_parser.add_argument("--entropy", type=int, default=None,
+        cmd_parser.add_argument("--entropy", type=float, default=None,
                                 help="The minimum password's entropy.")
         cmd_parser.add_argument("--clipboard", action="store_true",
                                 help="Copy password to system clipboard " + \
@@ -385,8 +396,12 @@ class CLI:
         if self.args.entropy:
             length = max(generator.get_minimum_length(self.args.entropy),
                          self.args.length)
+        elif self.conf["default_password_length"].has_key(generator_name):
+            length = self.conf["default_password_length"][generator_name]
+        elif generator_name.split(":")[1].startswith("diceware"):
+            length = self.conf["default_password_length"]["diceware"]
         else:
-            length = self.args.length
+            length = self.conf["default_password_length"]["normal"]
         entropy = generator.get_entropy(length)
         password = generator.get_random_password(length)
         print "Random password of length {} (entropy={}):".format(length,
