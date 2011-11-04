@@ -20,6 +20,8 @@ While it doesn't contain any password, the resulting database can be
 encrypted using AES-256 or GnuPG (feature planned) and then stored remotely
 using (S)FTP.
 
+If you find any bug, please report it on https://bugs.launchpad.net/passman
+
 
 
 === REQUIRED ===
