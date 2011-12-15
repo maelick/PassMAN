@@ -68,7 +68,7 @@ default_distant: the default protocol used to store remotely the database.
                  Can be either ftp or ssh (for sftp).
 default_generator: the default generator to use when generating random
                    passwords or adding a new entry in the database.
-                   See below for more informations
+                   See below for more informations.
 symbols_dir: the directory in which the dictionaries are store.
 
 clipboard_cmdlin: the command to use to store a password into the clipboard.
