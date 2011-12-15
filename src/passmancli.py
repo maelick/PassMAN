@@ -43,7 +43,7 @@ class CLI:
                             "instead of opening a new one.")
         parser.add_argument("-c", "--conf",
                             help="The configuration file to use (default " + \
-                            "is ~/.passman/passman.conf).")
+                            "is ~/.passman/passman.yml).")
         self.parser = parser
         self.init_commands()
 
@@ -139,11 +139,8 @@ class CLI:
         group = cmd_parser.add_mutually_exclusive_group()
         group.add_argument("-t", "--tag",
                            help="The tag of the entries to list.")
-        group.add_argument("-f", "--filter",
-                           help="Regexp used to filter the list to print.")
-        cmd_parser.add_argument("--sep", default="|",
-                                help="The separator used to define " +
-                                "multiple regexp.")
+        group.add_argument("-f", "--filter", nargs="+",
+                           help="Regex used to filter the list to print.")
         cmd_parser.add_argument("--entropy",
                                 action="store_true",
                                 help="Computes the entries entropy.")
@@ -154,8 +151,7 @@ class CLI:
         """
         self.load_database()
         if self.args.filter:
-            keywords = self.args.filter.split(self.args.sep)
-            entries = self.manager.filter(keywords)
+            entries = self.manager.filter(self.args.filter)
         else:
             entries = self.manager.get_entries(self.args.tag)
 
@@ -225,10 +221,7 @@ class CLI:
         cmd_parser.set_defaults(action=self.add_tag_action)
         group = cmd_parser.add_mutually_exclusive_group()
         group.add_argument("-f", "--filter",
-                           help="Regexp used to filter the list to print.")
-        cmd_parser.add_argument("--sep", default="|",
-                                help="The separator used to define " +
-                                "multiple regexp.")
+                           help="Regex used to filter the list to print.")
         cmd_parser.add_argument("-t", "--tag", required=True,
                                 help="The tag to add.")
 
@@ -238,8 +231,7 @@ class CLI:
         """
         self.load_database()
         if self.args.filter:
-            keywords = self.args.filter.split(self.args.sep)
-            entries = self.manager.filter(keywords)
+            entries = self.manager.filter(self.args.filter)
         else:
             entries = self.manager.get_entries()
 
@@ -256,12 +248,9 @@ class CLI:
         cmd_parser.set_defaults(action=self.remove_tag_action)
         group = cmd_parser.add_mutually_exclusive_group()
         group.add_argument("-f", "--filter",
-                           help="Regexp used to filter the list to print.")
-        cmd_parser.add_argument("--sep", default="|",
-                                help="The separator used to define " +
-                                "multiple regexp.")
+                           help="Regex used to filter the list to print.")
         cmd_parser.add_argument("-t", "--tag", required=True,
-                                help="The tag to add.")
+                                help="The tag to remove.")
 
     def remove_tag_action(self):
         """
@@ -269,8 +258,7 @@ class CLI:
         """
         self.load_database()
         if self.args.filter:
-            keywords = self.args.filter.split(self.args.sep)
-            entries = self.manager.filter(keywords)
+            entries = self.manager.filter(self.args.filter)
         else:
             entries = self.manager.get_entries()
 
@@ -287,12 +275,9 @@ class CLI:
         cmd_parser.set_defaults(action=self.remove_action)
         group = cmd_parser.add_mutually_exclusive_group()
         group.add_argument("-t", "--tag",
-                           help="The tag of the entries to list.")
+                           help="The tag of the entries to remove.")
         group.add_argument("-f", "--filter",
-                           help="Regexp used to filter the list to print.")
-        cmd_parser.add_argument("--sep", default="|",
-                                help="The separator used to define " +
-                                "multiple regexp.")
+                           help="Regex used to filter the list to print.")
 
     def remove_action(self):
         """
@@ -326,15 +311,12 @@ class CLI:
         cmd_parser.set_defaults(action=self.password_action)
         group = cmd_parser.add_mutually_exclusive_group()
         group.add_argument("-t", "--tag",
-                           help="The tag of the entries to list.")
+                           help="The tag of the entries.")
         group.add_argument("-f", "--filter",
-                           help="Regexp used to filter the list to print.")
-        cmd_parser.add_argument("--sep", default="|",
-                                help="The separator used to define " +
-                                "multiple regexp.")
+                           help="Regex used to filter the list of entries.")
         cmd_parser.add_argument("-i", "--index", type=int, default=0,
                                 help="The index of the entry in the " + \
-                                "filtered list.")
+                                "tag/filtered list.")
         cmd_parser.add_argument("--clipboard", action="store_true",
                                 help="Copy password to system clipboard " + \
                                 "instead of printing it to stdout.")
@@ -371,11 +353,10 @@ class CLI:
         cmd_parser.set_defaults(action=self.generate_action)
         cmd_parser.add_argument("-g", "--generator",
                                 default=None,
-                                help="The separator used to define " +
-                                "multiple regexp.")
+                                help="The generator's name.")
         cmd_parser.add_argument("--length", type=int, default=-1,
                                 help="The minimum password's length " +
-                                "(default: 12).")
+                                "(see configuration file for default).")
         cmd_parser.add_argument("--entropy", type=float, default=None,
                                 help="The minimum password's entropy.")
         cmd_parser.add_argument("--clipboard", action="store_true",
