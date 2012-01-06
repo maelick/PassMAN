@@ -62,9 +62,12 @@ class PasswordGenerator:
     def get_random_password(self, n=15):
         """
         Returns a random password of length n (15 by default).
+        This method is cryptographically secure as the random seed used for
+        password generation is obtained with os.urandom function to get entropy
+        from the system and generates 1024 bits sequence used as seed.
         """
         state = random.getstate()
-        seed = os.urandom
+        seed = os.urandom(1024)
         random.seed(seed)
         password = self.get_next_password(n)
         random.setstate(state)
