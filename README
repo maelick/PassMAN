@@ -29,7 +29,7 @@ If you find any bug, please report it on https://bugs.launchpad.net/passman
 Python 2.7
 PyYAML
 OpenSSL for AES encryption
-paramiko for SFTP functionality
+paramiko for SSH/SFTP functionality
 
 
 

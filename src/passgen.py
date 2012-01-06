@@ -217,7 +217,7 @@ class GeneratorManager:
     """
     A GeneratorManager is used to manage the different PasswordGenerators.
     It's main use is for loading into memory only PassmanGenerators that are
-    needed. It still loads Oplop, SuperGenPass and PasswordComposer managers.
+    needed. It always loads Oplop, SuperGenPass and PasswordComposer managers.
     """
     yaml_tag = u'!GeneratorManager'
 

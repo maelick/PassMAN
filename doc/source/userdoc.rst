@@ -44,7 +44,7 @@ Required libraries and softwares
 - Python 2.7
 - PyYAML
 - OpenSSL for AES encryption
-- paramiko for SFTP functionality
+- paramiko for SSH/SFTP functionality
 
 
 Installation
