@@ -41,6 +41,8 @@ class CLI:
                             action="store_true",
                             help="Creates a new password database file " + \
                             "instead of opening a new one.")
+        parser.add_argument("-v", "--verbose", action="store_true",
+                            default=False, help="Verbose mode.")
         parser.add_argument("-c", "--conf",
                             help="The configuration file to use (default " + \
                             "is ~/.passman/passman.yml).")
@@ -106,7 +108,8 @@ class CLI:
         passphrase = self.conf["db"]["passphrase"] \
                      if self.conf["db"].has_key("passphrase") else None
         distant_loader.load(self.conf["db"]["filename"], passphrase)
-        print "Database retrieved."
+        if self.args.verbose:
+            print "Database retrieved."
 
     def init_push(self):
         """
@@ -127,7 +130,8 @@ class CLI:
                      if self.conf["db"].has_key("passphrase") else None
         distant_loader.save(self.manager, self.conf["db"]["filename"],
                             passphrase)
-        print "Database pushed."
+        if self.args.verbose:
+            print "Database pushed."
 
     def init_list(self):
         """
@@ -155,8 +159,9 @@ class CLI:
         else:
             entries = self.manager.get_entries(self.args.tag)
 
-        print "i) name (generator): username [(nonce)] [(comment)]: " + \
-              "minimum length/entropy (tag list)"
+        if self.args.verbose:
+            print "i) name (generator): username [(nonce)] [(comment)]: " + \
+                  "minimum length/entropy (tag list)"
         for i, e in enumerate(entries):
             if self.args.entropy:
                 entropy = e.get_entropy(self.manager.generator_manager)
@@ -182,7 +187,7 @@ class CLI:
         cmd_parser.add_argument("--username", required=True)
         cmd_parser.add_argument("--comment", default="")
         cmd_parser.add_argument("--nonce", default="")
-        cmd_parser.add_argument("--length", type=int, default=-1)
+        cmd_parser.add_argument("--length", type=int, default=0)
         cmd_parser.add_argument("--entropy", type=float, default=None)
 
     def add_action(self):
@@ -335,7 +340,8 @@ class CLI:
             entries = self.manager.get_entries()
 
         entry = entries[self.args.index]
-        print "Password for entry: {}".format(entry)
+        if self.args.verbose:
+            print "Password for entry: {}".format(entry)
         prompt = "Please enter the master passphrase: "
         passphrase = getpass.getpass(prompt)
         password = entry.get_password(self.manager.generator_manager,
@@ -356,7 +362,7 @@ class CLI:
         cmd_parser.add_argument("-g", "--generator",
                                 default=None,
                                 help="The generator's name.")
-        cmd_parser.add_argument("--length", type=int, default=-1,
+        cmd_parser.add_argument("--length", type=int, default=0,
                                 help="The minimum password's length " +
                                 "(see configuration file for default).")
         cmd_parser.add_argument("--entropy", type=float, default=None,
@@ -389,8 +395,9 @@ class CLI:
             length = self.conf["default_password_length"]["normal"]
         entropy = generator.get_entropy(length)
         password = generator.get_random_password(length)
-        print "Random password of length {} (entropy={}):".format(length,
-                                                                  entropy)
+        if self.args.verbose:
+            print "Random password of length {} (entropy={}):".format(length,
+                                                                      entropy)
 
         if self.args.clipboard:
             self.copy2clipboard(password)

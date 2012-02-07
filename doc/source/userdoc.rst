@@ -152,6 +152,7 @@ General usage is:
 Global options are:
 
 - -h or --help: display the help.
+- -v: verbose mode, display additional informations.
 - -n or --newdb: create a new database instead of using an existing one.
 - -c CONF or --conf CONF: specify the configuration file to use.
   Default: ~/.passman/passman.yml
