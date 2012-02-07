@@ -197,6 +197,8 @@ class CLI:
         if self.args.entropy:
             length = max(generator.get_minimum_length(self.args.entropy),
                          self.args.length)
+        elif self.args.length:
+            length = self.args.length
         elif self.conf["default_password_length"].has_key(generator):
             length = self.conf["default_password_length"][generator]
         elif generator.split(":")[1].startswith("diceware"):
@@ -377,6 +379,8 @@ class CLI:
         if self.args.entropy:
             length = max(generator.get_minimum_length(self.args.entropy),
                          self.args.length)
+        elif self.args.length:
+            length = self.args.length
         elif self.conf["default_password_length"].has_key(generator_name):
             length = self.conf["default_password_length"][generator_name]
         elif generator_name.split(":")[1].startswith("diceware"):
