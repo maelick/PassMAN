@@ -25,7 +25,7 @@ class CLI:
     """
     This class is the command line interface with PassMAN.
     It parses command line arguments to manipulate PassMAN and to open
-    the curses and GTK UI.
+    the curses and GUI.
     """
     def __init__(self):
         self.loader = None
@@ -71,7 +71,7 @@ class CLI:
         self.init_remove()
         self.init_password()
         self.init_curses()
-        self.init_gtk()
+        self.init_gui()
 
     def distant_options(self, parser):
         """
@@ -420,20 +420,20 @@ class CLI:
         print "curses"
         pass # TODO
 
-    def init_gtk(self):
+    def init_gui(self):
         """
-        Initializes the gtk command subparser options.
+        Initializes the gui command subparser options.
         """
-        help="Opens the GTK GUI."
-        cmd_parser = self.cmd_parsers.add_parser("gtk", help=help)
-        cmd_parser.set_defaults(action=self.gtk_action)
+        help="Opens the GUI."
+        cmd_parser = self.cmd_parsers.add_parser("gui", help=help)
+        cmd_parser.set_defaults(action=self.gui_action)
 
-    def gtk_action(self):
+    def gui_action(self):
         """
         Function called when the push command is passed as argument.
-        Starts de GTK GUI.
+        Starts de GUI.
         """
-        print "gtk"
+        print "gui"
         pass # TODO
 
     def parse_args(self, args=None):
