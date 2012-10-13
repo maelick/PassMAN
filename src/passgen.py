@@ -198,7 +198,7 @@ class GeneratorManager:
             }
 
     def get_generator(self, name):
-        """Returns the generator with his name.  oplop, supergenpass
+        """Returns the generator with his name. oplop, supergenpass
         and passwordcomposer is used for their respective
         generator. For PassmanGenerators, the name is the hash
         algorithm's name and the symbol's filename separated by a

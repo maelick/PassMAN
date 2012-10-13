@@ -48,11 +48,14 @@ class CLI:
         desc = "PassMAN Command Line Interface."
         self.interpreter = interpreter
         self.parser = CLIParser(description=desc)
-        self.parser.add_argument("-v", "--verbose", action="store_true",
-                                 default=False, help="Verbose mode.")
-        self.parser.add_argument("-c", "--conf",
-                                 help="The configuration file to use " + \
-                                 "(default is ~/.passman/passman.yml).")
+        if not self.interpreter:
+            self.parser.add_argument("-v", "--verbose", action="store_true",
+                                     default=False, help="Verbose mode.")
+            self.parser.add_argument("-c", "--conf",
+                                     help="The configuration file to " + \
+                                     "use (default is" + \
+                                     "~/.passman/passman.yml or " + \
+                                     "~/passman/passman.yml on M$ Windows).")
         title = "PassMAN-CLI Action"
         desc = "The action to do on the password database."
         help = "Use -h or --help with the action for more details."
@@ -60,6 +63,15 @@ class CLI:
                                                      description=desc,
                                                      help=help,
                                                      metavar="action_name")
+
+        self.add_command(Create())
+        self.add_command(List())
+        self.add_command(Add())
+        self.add_command(Remove())
+        self.add_command(AddTag())
+        self.add_command(RemoveTag())
+        self.add_command(Password())
+        self.add_command(Generate())
 
     def add_command(self, command):
         """Adds a subparser to the general parser."""
@@ -69,20 +81,25 @@ class CLI:
         subparser.set_defaults(command=command)
 
     def start(self, args=None):
-        """Parse the arguments of the script and runs the command passed
-        as parameters if options are valid."""
+        """Parse the arguments of the script and runs the command
+        passed as parameters if options are valid. Returns True if the
+        command have been successfully run or if -h option has been
+        used."""
         try:
             self.args = self.parser.parse_args(args)
         except ParserExitError:
-            return
+            return False
         cmd = self.args.command
-        if not self.interpreter:
+        if self.interpreter:
+            self.args.verbose = True
+        else:
             self.conf = actions.load_config(self.args.conf)
             self.loader = actions.load_loader(self.conf)
         cmd.args = self.args
         cmd.conf = self.conf
         cmd.loader = self.loader
         cmd.action()
+        return True
 
 
 class Command:
@@ -327,45 +344,27 @@ class Interpreter(Command):
         parser = CLI(True)
         parser.conf = self.conf
         parser.loader = self.loader
-        parser.add_command(Create())
         parser.add_command(Save())
-        parser.add_command(List())
-        parser.add_command(Add())
-        parser.add_command(Remove())
-        parser.add_command(AddTag())
-        parser.add_command(RemoveTag())
-        parser.add_command(Password())
-        parser.add_command(Generate())
         return parser
 
     def action(self):
         running = True
         while running:
-            cmd = ["-c", self.args.conf]
-            if self.args.verbose:
-                cmd.append("-v")
             try:
                 args = raw_input(">> ")
             except (EOFError, KeyboardInterrupt):
                 running = False
             else:
-                cmd.extend(shlex.split(args))
+                cmd = shlex.split(args)
                 self.get_parser().start(cmd)
 
 
 def main():
     cli = CLI()
-    cli.add_command(Create())
-    cli.add_command(List())
-    cli.add_command(Add())
-    cli.add_command(Remove())
-    cli.add_command(AddTag())
-    cli.add_command(RemoveTag())
-    cli.add_command(Password())
-    cli.add_command(Generate())
     cli.add_command(GUI())
     cli.add_command(Interpreter())
     cli.start()
+    print
     return 0
 
 if __name__ == "__main__":

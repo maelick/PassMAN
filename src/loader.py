@@ -91,18 +91,6 @@ class AESLoader(Loader):
             else:
                 raise CodingError
 
-class YAMLLoader(Loader):
-    """A YAMLLoader stores and retrives the PasswordManager using YAML
-    in a plain text file."""
-
-    def save(self, manager, filename, passphrase=None):
-        with open(filename, 'w') as f:
-            yaml.dump(manager, f)
-
-    def load(self, filename, passphrase=None):
-        with open(filename) as f:
-            return yaml.load(f)
-
 class GPGLoader(Loader):
     """A GPGLoader stores and retrives the PasswordManager using YAML,
     bzip2 and GPG."""

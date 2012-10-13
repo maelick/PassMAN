@@ -28,8 +28,6 @@ def generate_default_symbols(filename):
     with open(filename, 'w') as f:
         f.write("\n".join([chr(33 + i) for i in xrange(94)]))
 
-# Test égalité entries
-
 class TestPasswordEntry(unittest.TestCase):
     def setUp(self):
         generate_default_symbols("test_symbols")
