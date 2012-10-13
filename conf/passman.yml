@@ -15,15 +15,5 @@ default_password_length:
 db:
     filename: ~/.passman/passman.db
     format: aes
-    passphrase: pass
-
-ssh:
-    host: localhost
-    port: 22
-    username: maelick
-    filename: /home/maelick/passman.db
-
-ftp:
-    host: ftp.60free.ovh.org
-    username: mael-test
-    filename: passman.db
+    #passphrase: secretpassphrase
+    uses_passphrase = True

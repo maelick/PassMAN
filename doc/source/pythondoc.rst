@@ -79,22 +79,10 @@ AES loader
 
 .. autoexception:: loader.CodingError
 
-Distant loader
-..............
+Database actions: actions
+-------------------------
 
-.. autoclass:: loader.DistantLoader
-   :members:
-
-FTP loader
-..........
-
-.. autoclass:: loader.FTPLoader
-   :members:
-
-SFTP loader
-...........
-
-.. autoclass:: loader.SFTPLoader
+.. automodule:: actions
    :members:
 
 PassMAN Command Line Interface

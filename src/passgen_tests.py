@@ -94,7 +94,7 @@ class TestPassmanGenerator(unittest.TestCase):
         secure_password = self.generator.get_password("name", "username",
                                                       "nonce", "passphrase",
                                                       15)
-        self.assertEqual(secure_password, "{H~Won5+t@oN\\Qf")
+        self.assertEqual(secure_password, "~T'pIAM+vyZ[,7T")
 
         # Test if seed has been correctly set back
         next_password = self.generator.get_next_password()

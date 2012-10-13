@@ -138,10 +138,10 @@ class PasswordManager(yaml.YAMLObject):
         Returns the list of PasswordEntries. It is possible to specify a tag
         to get only the entries associated with this tag.
         """
-        if tag is None:
-            return self.passwords
-        else:
+        if tag:
             return [e for e in self.passwords if tag in e.tags]
+        else:
+            return self.passwords
 
     def get_entry(self, name):
         """
