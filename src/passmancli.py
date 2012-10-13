@@ -21,8 +21,11 @@
 import argparse
 import sys
 import shlex
+try:
+    import readline
+except:
+    pass
 
-import passman
 import actions
 
 
@@ -38,11 +41,9 @@ class CLIParser(argparse.ArgumentParser):
 
 
 class CLI:
-    """
-    This class is the command line interface with PassMAN.
-    It parses command line arguments to manipulate PassMAN and to open
-    the curses and GUI.
-    """
+    """This class is the command line interface with PassMAN. It
+    parses command line arguments to manipulate PassMAN and to open
+    the curses and GUI."""
     def __init__(self, interpreter=False):
         desc = "PassMAN Command Line Interface."
         self.interpreter = interpreter
@@ -169,7 +170,7 @@ class Add(Command):
         subparser.add_argument("--comment", default="")
         subparser.add_argument("--nonce", default="")
         subparser.add_argument("-l", "--length", type=int, default=0)
-        subparser.add_argument("-e","--entropy", type=float, default=0.)
+        subparser.add_argument("-e", "--entropy", type=float, default=0.)
 
     def action(self):
         actions.load_database(self.conf, self.loader)
@@ -338,10 +339,6 @@ class Interpreter(Command):
         return parser
 
     def action(self):
-        try:
-            import readline
-        except:
-            pass
         running = True
         while running:
             cmd = ["-c", self.args.conf]

@@ -17,8 +17,11 @@
 # You should have received a copy of the GNU General Public License
 # along with PassMAN.  If not, see <http://www.gnu.org/licenses/>.
 
-import unittest, random, os, copy
-from passgen import PassmanGenerator, GeneratorManager
+import unittest
+import os
+import copy
+
+from passgen import GeneratorManager
 from passman import PasswordEntry, PasswordManager
 
 def generate_default_symbols(filename):

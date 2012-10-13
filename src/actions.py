@@ -30,10 +30,10 @@ import passman
 def load_config(filename=None):
     """Load the configuration."""
     if not filename:
-        dir = os.path.join(os.path.expanduser("~"), ".passman")
+        directory = os.path.join(os.path.expanduser("~"), ".passman")
         if sys.platform == "win32" and not os.path.exists(dir):
-            dir = os.path.join(os.path.expanduser("~"), "passman")
-        filename = os.path.join(dir, "passman.yml")
+            directory = os.path.join(os.path.expanduser("~"), "passman")
+        filename = os.path.join(directory, "passman.yml")
     with open(filename) as f:
         conf = yaml.load(f)
     db_filename = os.path.expanduser(conf["db"]["filename"])
@@ -83,7 +83,6 @@ def load_database(conf, loader):
 
 def save_database(conf, loader):
     """Save the password database."""
-    prompt = "Please enter the master passphrase: "
     passphrase = get_password(conf)
     loader.save(conf["database"], conf["db"]["filename"], passphrase)
 
@@ -139,7 +138,7 @@ def add(conf, name, username, comment="", nonce="",
         pass
     elif conf["default_password_length"].has_key(generator):
         length = conf["default_password_length"][generator]
-    elif generator_name.split(":")[1].startswith("diceware"):
+    elif generator.split(":")[1].startswith("diceware"):
         length = conf["default_password_length"]["diceware"]
     else:
         length = conf["default_password_length"]["normal"]
