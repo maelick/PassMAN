@@ -48,9 +48,10 @@ def load_loader(conf):
         return loader.GPGLoader()
     elif conf["db"]["format"] == "aes":
         return loader.AESLoader()
-    else:
+    elif conf["db"]["format"] == "yaml":
         return loader.YAMLLoader()
-    # TODO: change else to elif and raise error for else
+    else:
+        raise ValueError("Unknown database format")
 
 
 def get_password(conf):
