@@ -30,8 +30,10 @@ https://bugs.launchpad.net/passman
 
 - Password generation based on differents algorithms and dictionaries
 - Password management with tags and regex filters
-- CLI interface to the database including commands: list, add,
+- CLI interface to the database including commands: create, list, add,
   add_tag, remove_tag, remove, password, generate.
+- CLI interpreter: entering a loop which avoid to load database each
+  time. Additional database commands: save.
 - YAML and AES databases.
 - YAML configuration file.
 - Dictionaries included: diceware and diceware8k (de, en, fi, fr, it,
@@ -56,7 +58,7 @@ example:
 
   mkdir ~/passman
   cp src/*.py ~/passman
-  ln -s ~/passman/passman-cli.py ~/bin/passman
+  ln -s ~/passman/passmancli.py ~/bin/passman
 
 And in your ~/.bashrc (or equivalent):
 
@@ -81,8 +83,6 @@ with YAML.
 
 Options for ~/.passman/passman.yml:
 
-- default_distant: the default protocol used to store remotely the
-  database. Can be either ftp or ssh (for sftp).
 - default_generator: the default generator to use when generating
   random passwords or adding a new entry in the database. See below
   for more informations.
@@ -101,8 +101,6 @@ Options for ~/.passman/passman.yml:
       gnupg. aes encryption also uses bzip2 compression and
       YAML. gnupg is not yet implemented but will also use bzip2 and
       YAML.
-    - use_passphrase: True if database requires a password (uses
-      encryption).
     - passphrase: encryption passphrase to use (optional and not
       recommended to use).
 

@@ -26,18 +26,24 @@ be encrypted using AES-256 or GnuPG (feature planned).
 If you find any bug, please report it on
 https://bugs.launchpad.net/passman
 
+
+
 Features
 --------
 
 - Password generation based on differents algorithms and dictionaries
 - Password management with tags and regex filters
-- CLI interface to the database including commands: list, add,
+- CLI interface to the database including commands: create, list, add,
   add_tag, remove_tag, remove, password, generate.
+- CLI interpreter: entering a loop which avoid to load database each
+  time. Additional database commands: save.
 - YAML and AES databases.
 - YAML configuration file.
 - Dictionaries included: diceware and diceware8k (de, en, fi, fr, it,
   nl, sv), latin alphabet, lowercase (nocase) latin alphabet,
   alphanumerical, base64 and ascii
+
+
 
 Required libraries and softwares
 --------------------------------
@@ -45,6 +51,7 @@ Required libraries and softwares
 - Python 2.7
 - PyYAML
 - OpenSSL for AES encryption
+
 
 
 Installation
@@ -58,7 +65,7 @@ example:
 
   mkdir ~/passman
   cp src/*.py ~/passman
-  ln -s ~/passman/passman-cli.py ~/bin/passman
+  ln -s ~/passman/passmancli.py ~/bin/passman
 
 And in your ~/.bashrc (or equivalent):
 
@@ -77,6 +84,8 @@ content of conf directory into ~/passman.
 
 Installation scripts will be provided in future versions.
 
+
+
 Configuration
 -------------
 
@@ -86,8 +95,6 @@ with YAML.
 
 Options for ~/.passman/passman.yml:
 
-- default_distant: the default protocol used to store remotely the
-  database. Can be either ftp or ssh (for sftp).
 - default_generator: the default generator to use when generating
   random passwords or adding a new entry in the database. See below
   for more informations.
@@ -106,10 +113,10 @@ Options for ~/.passman/passman.yml:
       gnupg. aes encryption also uses bzip2 compression and
       YAML. gnupg is not yet implemented but will also use bzip2 and
       YAML.
-    - use_passphrase: True if database requires a password (uses
-      encryption).
     - passphrase: encryption passphrase to use (optional and not
       recommended to use).
+
+
 
 Generator name format
 ---------------------
@@ -129,6 +136,8 @@ can be used by simply using their name.
 Currently implemented third-party algorithms:
 
 - oplop
+
+
 
 CLI Usage
 ---------
@@ -151,31 +160,16 @@ Global options are:
 
 The subcommand is one of the following:
 
-- generate
 - create
 - list
 - add
+- remove
 - add_tag
 - remove_tag
-- remove
 - password
+- generate
 - interpreter
 - gui
-
-Generate subcommand
-...................
-
-Generate a random password using an algorithm implemented in
-PassMAN. Options are:
-
-- -h, --help: display the help.
-- -g GENERATOR, --generator GENERATOR: the generator/algorithm name to
-   use.
-- -l, --length LENGTH: the minimum length of the resulting password
-  (see configuration file for default)
-- -e, --entropy ENTROPY: the minimum entropy of the password.
-- --clipboard: copy password to clipboard instead of printing it to
-    stdout.
 
 Create
 ......
@@ -213,6 +207,16 @@ Add a new entry to the database. Options are:
   (see configuration file for default)
 - -e --entropy ENTROPY: the minimum entropy of the password.
 
+Remove subcommand
+.................
+
+Remove multiple entries matching a tag or filters. Options are:
+
+- -h, --help: display the help.
+- -t TAG or --tag TAG: the tag of the entries to remove.
+- -f FILTERS or --filter FILTERS: a list of regex to use to filter
+   entries.
+
 Add tag subcommand
 ..................
 
@@ -233,16 +237,6 @@ Remove a tag from multiple entries matching filters. Options are:
    entries.
 - -t TAG or --tag TAG: the tag to remove.
 
-Remove subcommand
-.................
-
-Remove multiple entries matching a tag or filters. Options are:
-
-- -h, --help: display the help.
-- -t TAG or --tag TAG: the tag of the entries to remove.
-- -f FILTERS or --filter FILTERS: a list of regex to use to filter
-   entries.
-
 Password subcommand
 ...................
 
@@ -257,6 +251,21 @@ Get the associated password of an entry. Options are:
 - --clipboard: copy password to clipboard instead of printing it to
     stdout.
 
+Generate subcommand
+...................
+
+Generate a random password using an algorithm implemented in
+PassMAN. Options are:
+
+- -h, --help: display the help.
+- -g GENERATOR, --generator GENERATOR: the generator/algorithm name to
+   use.
+- -l, --length LENGTH: the minimum length of the resulting password
+  (see configuration file for default)
+- -e, --entropy ENTROPY: the minimum entropy of the password.
+- --clipboard: copy password to clipboard instead of printing it to
+    stdout.
+
 Interpreter subcommand
 ......................
 
@@ -268,6 +277,8 @@ GUI subcommand
 ..............
 
 Start the GUI. Not implemented yet.
+
+
 
 Credits
 -------

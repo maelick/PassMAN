@@ -354,6 +354,7 @@ class Interpreter(Command):
                 args = raw_input(">> ")
             except (EOFError, KeyboardInterrupt):
                 running = False
+                print
             else:
                 cmd = shlex.split(args)
                 self.get_parser().start(cmd)
@@ -364,7 +365,6 @@ def main():
     cli.add_command(GUI())
     cli.add_command(Interpreter())
     cli.start()
-    print
     return 0
 
 if __name__ == "__main__":

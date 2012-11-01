@@ -1,8 +1,25 @@
+New in v0.2.0 (?)
+-----------------
+
+Second beta version.
+New:
+  * Distant loading/saving using FTP and SFTP: feature removed.
+  * CLI interpreter added.
+  * Create and save (only for interpreter) database commands added.
+  * Sphinx doc added
+  * Verbose mode
+Fix:
+  * Bug #885703
+  * Minor tweaks & fixes
+  * Overall refactoring
+
+
+
 New in v0.1.0 (31/10/2011)
 --------------------------
 
 First beta version.
-Implementend:
+New:
   * Password generation based on differents algorithms and dictionaries
   * Password management with tags and regex filters
   * CLI interface to the database including commands: retrieve, push, list,

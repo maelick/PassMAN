@@ -74,10 +74,10 @@ class PasswordEntry(yaml.YAMLObject):
                self.entropy == other.entropy
 
     def __str__(self):
-        s1 = "{} ({}): {}".format(self.name, self.generator, self.username)
-        s2 = "({})".format(self.nonce) if self.nonce else ""
-        s3 = "({})".format(self.nonce) if self.nonce else ""
-        return "{} {} {}: {}".format(s1, s2, s3, self.length)
+        s = "{} ({}): {}".format(self.name, self.generator, self.username)
+        s = "{} ({}):".format(s, self.nonce) if self.nonce else s + ":"
+        s = "{} {}".format(s, self.comment) if self.comment else s
+        return "{} {}".format(s, self.length)
 
     def match_re(self, regex):
         """Returns True if the regular expression passed as parameter

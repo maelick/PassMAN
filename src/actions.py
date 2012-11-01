@@ -50,13 +50,14 @@ def load_loader(conf):
         return loader.AESLoader()
     else:
         return loader.YAMLLoader()
+    # TODO: change else to elif and raise error for else
 
 
 def get_password(conf):
     """Get the password's password database"""
-    if not conf["db"]["use_passphrase"]:
+    if conf["db"]["format"] in ["yaml"]:
         return None
-    if "passphrase" in conf["db"]:
+    elif "passphrase" in conf["db"]:
         return conf["db"]["passphrase"]
     prompt = "Please enter the password's password database: "
     passphrase = getpass.getpass(prompt)
@@ -109,7 +110,7 @@ def list_entries(conf, filter=None, tag=None, verbose=False,
     for i, e in enumerate(entries):
         if print_entropy:
             entropy = e.get_entropy(conf["database"].generator_manager)
-            s = "{}) {}/{}".format(i, e, entropy)
+            s = "{}) {} (entropy={:.2f})".format(i, e, entropy)
         else:
             s = "{}) {}".format(i, e)
         if e.tags:

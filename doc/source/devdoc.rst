@@ -14,15 +14,17 @@ The first algorithm simply uses Python built-in pseudo-random number
 generator which is a Mersene Twister generator
 (https://en.wikipedia.org/wiki/Mersenne_twister) to pick each
 symbol. This means that the ordering of symbols in the dictionary is
-important and mustn't change. It must be noted that this means that
-the generation of the password cannot occur in a threaded
-environnement using the same generator withtout locks.
+important and must not change. This means that the generation of the
+password cannot occur in a threaded environnement using the same
+generator withtout locks.
 
 The seed is generated like this:
 
 - concatenate site name, username, nonce and passphrase;
 - compute hash (default is SHA-512);
 - compute Python seed with built-in seed function to get an integer.
+
+
 
 Architecture
 ------------
@@ -46,18 +48,18 @@ Password generation
 
 Password generators are implemented using an abstract class
 :py:class:`~passgen.PasswordGenerator`. Methods that needs to be
-overridden are the one giving the entropy given a length and the
-length given an entropy
-(:py:class:`~passgen.PasswordGenerator.get_entropy` and
-:py:class:`~passgen.PasswordGenerator.get_length`), the one returning
+overridden are the one giving the entropy for a given length
+(:py:class:`~passgen.PasswordGenerator.get_entropy`), the one giving
+the length for a given entropy
+(:py:class:`~passgen.PasswordGenerator.get_length`), the one returning
 the next random password
 (:py:class:`~passgen.PasswordGenerator.get_next_password`) and the one
 returning the password for a given site name, username, nonce and
 passphrase
-(:py:class:`~passgen.PasswordGenerator.get_password`). Actually
+(:py:class:`~passgen.PasswordGenerator.get_password`). Currently
 subclasses of :py:class:`~passgen.PasswordGenerator` are
 :py:class:`~passgen.PassmanGenerator` and
-:py:class:`~passgen.OplopGenerator`.  Future implementation are
+:py:class:`~passgen.OplopGenerator`. Future implementation are
 :py:class:`~passgen.SuperGenPassGenerator` and
 :py:class:`~passgen.PasswordComposerGenerator`.
 
