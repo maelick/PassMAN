@@ -80,13 +80,17 @@ def load_database(conf, loader):
         if os.path.isdir(filename):
             raise ValueError("password database is not a regular file")
         passphrase = get_password(conf)
-        conf["database"] = loader.load(conf["db"]["filename"], passphrase)
+        entries = loader.load(conf["db"]["filename"], passphrase)
+        create_database(conf)
+        conf["database"].passwords = entries
+        conf["database"].compute_tags()
 
 
 def save_database(conf, loader):
     """Save the password database."""
     passphrase = get_password(conf)
-    loader.save(conf["database"], conf["db"]["filename"], passphrase)
+    loader.save(conf["database"].passwords,
+                conf["db"]["filename"], passphrase)
 
 
 def list_entries(conf, filter=None, tag=None, verbose=False,

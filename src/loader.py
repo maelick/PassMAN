@@ -24,42 +24,42 @@ import bz2
 
 class CodingError(Exception):
     """Exceptions raised when an error occured during encoding or
-    decoding of a manager."""
+    decoding entries."""
     pass
 
 class Loader:
-    """A Loader is used to save and load a PasswordManager from a
+    """A Loader is used to save and load password entries from a
     file. Loader is an abstract class that should be overriden."""
 
-    def save(self, manager, filename, passphrase=None):
-        """Saves a PasswordManager in a file using an optional
+    def save(self, entries, filename, passphrase=None):
+        """Saves a list of password entries in a file using an optional
         passphrase. This method is abstract and must be overriden."""
         pass
 
     def load(self, filename, passphrase=None):
-        """Loads and returns a PasswordManager from a file using an
-        optional passphrase. This method is abstract and must be
-        overriden."""
+        """Loads and returns a list of password entries from a file
+        using an optional passphrase. This method is abstract and must
+        be overriden."""
         pass
 
 class YAMLLoader(Loader):
-    """A YAMLLoader stores and retrives the PasswordManager using YAML
+    """A YAMLLoader stores and retrieves password entries using YAML
     in a plain text file."""
 
-    def save(self, manager, filename, passphrase=None):
+    def save(self, entries, filename, passphrase=None):
         with open(filename, 'w') as f:
-            yaml.dump(manager, f)
+            yaml.dump(entries, f)
 
     def load(self, filename, passphrase=None):
         with open(filename) as f:
             return yaml.load(f)
 
 class AESLoader(Loader):
-    """An AESLoader stores and retrives the PasswordManager using
-    YAML, bzip2 and AES-256-CBC (with OpenSSL) using a passphrase."""
+    """An AESLoader stores and retrieves password entries using YAML,
+    bzip2 and AES-256-CBC (with OpenSSL) using a passphrase."""
 
-    def save(self, manager, filename, passphrase=None):
-        """Saves the manager from the filename using OpenSSL, bzip2
+    def save(self, entries, filename, passphrase=None):
+        """Saves the entries from the filename using OpenSSL, bzip2
         and YAML. Raises a CodingError if OpenSSL was unable to encode
         the file."""
         with open(filename, 'w') as f:
@@ -68,14 +68,14 @@ class AESLoader(Loader):
                                  stdin=subprocess.PIPE,
                                  stdout=subprocess.PIPE,
                                  stderr=subprocess.PIPE)
-            result = p.communicate(bz2.compress(yaml.dump(manager)))
+            result = p.communicate(bz2.compress(yaml.dump(entries)))
             if not result[1]:
                 f.write(result[0])
             else:
                 raise CodingError
 
     def load(self, filename, passphrase=None):
-        """Loads the manager from the filename using OpenSSL and
+        """Loads the entries from the filename using OpenSSL and
         YAML. Raises a CodingError if OpenSSL was unable to decode the
         file."""
         with open(filename) as f:
@@ -92,10 +92,10 @@ class AESLoader(Loader):
                 raise CodingError
 
 class GPGLoader(Loader):
-    """A GPGLoader stores and retrives the PasswordManager using YAML,
+    """A GPGLoader stores and retrieves password entries using YAML,
     bzip2 and GPG."""
 
-    def save(self, manager, filename, passphrase=None):
+    def save(self, entries, filename, passphrase=None):
         raise NotImplementedError
 
     def load(self, filename, passphrase=None):
