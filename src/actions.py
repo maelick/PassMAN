@@ -247,7 +247,7 @@ def password(conf, filter=None, tag=None, index=0,
         print password
 
 
-def generate(conf, generator=None, length=0, entropy=0,
+def generate(conf, generator, length=0, entropy=0,
              clipboard=False, verbose=False):
     """Generate a password
     - *conf* is a configuration dict
@@ -256,14 +256,13 @@ def generate(conf, generator=None, length=0, entropy=0,
     - *clipboard* if True will store password in clipboard
     - *verbose* if True verbose mode"""
     manager = conf["database"].generator_manager
-    default_generator = conf["default_generator"]
-    generator_name = generator if generator else default_generator
+    generator_name = generator if generator else conf["default_generator"]
     generator = manager.get_generator(generator_name)
 
     if entropy:
         length = max(generator.get_minimum_length(entropy), length)
     elif length:
-        length = length
+        pass
     elif conf["default_password_length"].has_key(generator_name):
         length = conf["default_password_length"][generator_name]
     elif generator_name.split(":")[1].startswith("diceware"):

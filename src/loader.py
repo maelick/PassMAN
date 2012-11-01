@@ -96,7 +96,9 @@ class GPGLoader(Loader):
     bzip2 and GPG."""
 
     def save(self, entries, filename, passphrase=None):
+        bz2.compress(yaml.dump(entries))
         raise NotImplementedError
 
     def load(self, filename, passphrase=None):
+        yaml.load(bz2.decompress(result))
         raise NotImplementedError

@@ -6,8 +6,11 @@ New:
   * Distant loading/saving using FTP and SFTP: feature removed.
   * CLI interpreter added.
   * Create and save (only for interpreter) database commands added.
-  * Sphinx doc added
-  * Verbose mode
+  * Sphinx doc added.
+  * Verbose mode.
+  * GPG database encryption.
+  * Random password generation: -n option to specify number of
+    passwords to generate.
 Fix:
   * Bug #885703
   * Minor tweaks & fixes

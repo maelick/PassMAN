@@ -307,17 +307,20 @@ class Generate(Command):
         subparser.add_argument("-l", "--length", type=int, default=0,
                                 help="The minimum password's length " +
                                 "(see configuration file for default).")
-        subparser.add_argument("-e", "--entropy", type=float, default=None,
+        subparser.add_argument("-e", "--entropy", type=float, default=0,
                                 help="The minimum password's entropy.")
+        subparser.add_argument("-n", type=int, default=1,
+                                help="The number of passwords to generate.")
         subparser.add_argument("--clipboard", action="store_true",
                                 help="Copy password to system clipboard " + \
                                 "instead of printing it to stdout.")
 
     def action(self):
         actions.load_database(self.conf, self.loader)
-        actions.generate(self.conf, self.args.generator, self.args.length,
-                         self.args.entropy, self.args.clipboard,
-                         self.args.verbose)
+        for i in xrange(self.args.n):
+            actions.generate(self.conf, self.args.generator,
+                             self.args.length, self.args.entropy,
+                             self.args.clipboard, self.args.verbose)
 
 
 class GUI(Command):
@@ -362,8 +365,8 @@ class Interpreter(Command):
 
 def main():
     cli = CLI()
-    cli.add_command(GUI())
     cli.add_command(Interpreter())
+    cli.add_command(GUI())
     cli.start()
     return 0
 

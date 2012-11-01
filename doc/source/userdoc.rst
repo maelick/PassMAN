@@ -21,7 +21,7 @@ strength of the passwords. Tags are used to easily filter the list of
 entries.
 
 Although it doesn't contain any password, the resulting database can
-be encrypted using AES-256 or GnuPG (feature planned).
+be encrypted using AES-256 or GnuPG.
 
 If you find any bug, please report it on
 https://bugs.launchpad.net/passman
@@ -37,7 +37,7 @@ Features
   add_tag, remove_tag, remove, password, generate.
 - CLI interpreter: entering a loop which avoid to load database each
   time. Additional database commands: save.
-- YAML and AES databases.
+- YAML, AES and GPG for database serialization/encryption.
 - YAML configuration file.
 - Dictionaries included: diceware and diceware8k (de, en, fi, fr, it,
   nl, sv), latin alphabet, lowercase (nocase) latin alphabet,
@@ -51,6 +51,7 @@ Required libraries and softwares
 - Python 2.7
 - PyYAML
 - OpenSSL for AES encryption
+- PyGPGME for GPG encryption
 
 
 
@@ -110,8 +111,7 @@ Options for ~/.passman/passman.yml:
 - db:
     - filename: the filename of the local database file.
     - format: the format used to save the database. May be yaml, aes,
-      gnupg. aes encryption also uses bzip2 compression and
-      YAML. gnupg is not yet implemented but will also use bzip2 and
+      gnupg. aes and gpg encryption also use bzip2 compression and
       YAML.
     - passphrase: encryption passphrase to use (optional and not
       recommended to use).
@@ -263,6 +263,7 @@ PassMAN. Options are:
 - -l, --length LENGTH: the minimum length of the resulting password
   (see configuration file for default)
 - -e, --entropy ENTROPY: the minimum entropy of the password.
+- -n: The number of passwords to generate.
 - --clipboard: copy password to clipboard instead of printing it to
     stdout.
 
