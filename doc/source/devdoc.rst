@@ -112,3 +112,9 @@ GUI Architecture
 ................
 
 Not yet implemented.
+
+Other modules
+.............
+
+Others module includes:
+- :py:mod:`diceware` containing functions used for the diceware generator feature.

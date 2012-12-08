@@ -72,6 +72,7 @@ class CLI:
         self.add_command(RemoveTag())
         self.add_command(Password())
         self.add_command(Generate())
+        self.add_command(MakeDiceware())
 
     def add_command(self, command):
         """Adds a subparser to the general parser."""
@@ -321,6 +322,29 @@ class Generate(Command):
             actions.generate(self.conf, self.args.generator,
                              self.args.length, self.args.entropy,
                              self.args.clipboard, self.args.verbose)
+
+
+class MakeDiceware(Command):
+    """Class used to represents the make_diceware Command which uses a
+    source text file to create a diceware words list."""
+
+    name = "make_diceware"
+    help = "Creates a diceware with most frequent words of a source text file."
+
+    def init(self, subparser):
+        Command.init(self, subparser)
+        subparser.add_argument("-n", type=int, default=7776,
+                                help="Maximum number of words of the diceware.")
+        subparser.add_argument("-l", "--min_length", type=int, default=2,
+                                help="The minimum length of each words.")
+        subparser.add_argument("src_filename",
+                                help="Source text file name.")
+        subparser.add_argument("out_filename",
+                                help="Output file name.")
+
+    def action(self):
+        actions.make_diceware(self.args.src_filename, self.args.n,
+                              self.args.min_length, self.args.out_filename)
 
 
 class GUI(Command):

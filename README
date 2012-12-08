@@ -39,6 +39,8 @@ https://bugs.launchpad.net/passman
 - Dictionaries included: diceware and diceware8k (de, en, fi, fr, it,
   nl, sv), latin alphabet, lowercase (nocase) latin alphabet,
   alphanumerical, base64 and ascii
+- Diceware word list generation using most frequen words of a source
+  text file.
 
 
 

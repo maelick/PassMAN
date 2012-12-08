@@ -26,6 +26,7 @@ import yaml
 
 import loader
 import passman
+import diceware
 
 def load_config(filename=None):
     """Load the configuration."""
@@ -279,3 +280,20 @@ def generate(conf, generator, length=0, entropy=0,
         copy2clipboard(conf, password)
     else:
         print password
+
+
+def make_diceware(src_filename, n, min_length, out_filename=None):
+    """Make a diceware using a source text and choosing most frequent
+    words
+    - *src_filename* is the name of the source file
+    - *n* is the maximal number of words of the diceware
+    - *min_length* is the minimal length of each words
+    - *out_filename* if given, the diceware is written to this file"""
+    text = diceware.load_file(src_filename)
+    wc = diceware.make_word_count(diceware.filter_text(text))
+    dw = diceware.make_diceware(wc, n, min_length)
+    dw.sort(key=len)
+    print len(dw)
+    if out_filename:
+        diceware.write_diceware(dw, out_filename)
+    return dw

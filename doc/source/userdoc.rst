@@ -42,6 +42,8 @@ Features
 - Dictionaries included: diceware and diceware8k (de, en, fi, fr, it,
   nl, sv), latin alphabet, lowercase (nocase) latin alphabet,
   alphanumerical, base64 and ascii
+- Diceware word list generation using most frequen words of a source
+  text file.
 
 
 
@@ -168,6 +170,7 @@ The subcommand is one of the following:
 - remove_tag
 - password
 - generate
+- make_diceware
 - interpreter
 - gui
 
@@ -266,6 +269,21 @@ PassMAN. Options are:
 - -n: The number of passwords to generate.
 - --clipboard: copy password to clipboard instead of printing it to
     stdout.
+
+Make_diceware subcommand
+........................
+
+Creates a diceware with most frequent words of a source text
+file. Options are:
+
+- -h, --help: display the help
+- -n N: the maximum number of words of the diceware.
+- -l MIN_LENGTH, --min_length MIN_LENGTH: the minimum length of each
+  words.
+- Requires two positional arguments:
+
+  - src_filename: the source text file name.
+  - out_filename: the output file name.
 
 Interpreter subcommand
 ......................

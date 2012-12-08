@@ -11,6 +11,7 @@ New:
   * GPG database encryption.
   * Random password generation: -n option to specify number of
     passwords to generate.
+  * Diceware word list generator added.
 Fix:
   * Bug #885703
   * Minor tweaks & fixes

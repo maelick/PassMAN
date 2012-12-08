@@ -79,6 +79,12 @@ AES loader
 
 .. autoexception:: loader.CodingError
 
+Diceware generation: diceware
+-----------------------------
+
+.. automodule:: diceware
+   :members:
+
 Database actions: actions
 -------------------------
 
