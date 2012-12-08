@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 #-*- coding: utf-8 -*-
 #
-# Copyright 2011 Maëlick Claes <himself@maelick.net>
-#
 # This file is part of PassMAN.
 #
 # PassMAN is free software: you can redistribute it and/or modify
