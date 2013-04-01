@@ -43,8 +43,15 @@ class TestOplopGenerator(unittest.TestCase):
                                93.32192809488737)
 
     def test_secure_password(self):
+        secure_password = self.generator.get_password("", "passman",
+                                                      "", "passman", 8)
+        self.assertEqual(secure_password, "sYyCj4OE")
         secure_password = self.generator.get_password("name", "username",
                                                       "nonce", "passphrase",
+                                                      8)
+        self.assertEqual(secure_password, "6rWI_aOE")
+        secure_password = self.generator.get_password("", "username",
+                                                      "", "passphrase",
                                                       8)
         self.assertEqual(secure_password, "6rWI_aOE")
         secure_password = self.generator.get_password("name", "username",
