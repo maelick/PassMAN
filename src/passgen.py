@@ -215,8 +215,35 @@ class SuperGenPassGenerator(PasswordGenerator):
         return self._generate_passwd(passphrase + ":" + name, n)
 
 class PasswordComposerGenerator(PasswordGenerator):
+    """Generates passwords using PasswordComposer's algorithm
+    (http://www.angel.net/~nic/passwd.sha1.1a.html)."""
     yaml_tag = u'!PasswordComposerGenerator'
-    pass
+
+    def get_entropy(self, length):
+        """Returns the entropy for a given length."""
+        return math.log(64 ** (length - 1) * 10, 2)
+        pass
+
+    def get_length(self, entropy):
+        """Returns the length to have password for a given entropy."""
+        return math.log(2 ** entropy / 10., 64) + 1
+        pass
+
+    def get_next_password(self, n=8):
+        """Returns the next password given of length n (8 by default)
+        by the generator."""
+        website = "".join([chr(33 + random.randrange(94)) \
+                           for i in xrange(n)])
+        passphrase = "".join([chr(33 + random.randrange(94)) \
+                              for i in xrange(n)])
+        return self.get_password(name, "", "", passphrase, n)
+
+    def get_password(self, name, username, nonce, passphrase, n=8):
+        """Returns the next secure password of length n given by the
+        generator depending of the passphrase and username."""
+        sha1 = hashlib.sha1()
+        sha1.update(passphrase + ":" + name)
+        return base64.b64encode(sha1.digest())[:n-2] + "1a"
 
 class GeneratorManager:
     """A GeneratorManager is used to manage the different

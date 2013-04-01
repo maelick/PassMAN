@@ -16,7 +16,7 @@
 # along with PassMAN.  If not, see <http://www.gnu.org/licenses/>.
 
 import unittest, random, os
-from passgen import PassmanGenerator, OplopGenerator, SuperGenPassGenerator
+import passgen
 
 def generate_default_symbols(filename):
     with open(filename, 'w') as f:
@@ -27,7 +27,7 @@ class TestOplopGenerator(unittest.TestCase):
 
     def setUp(self):
         generate_default_symbols("test_symbols")
-        self.generator = OplopGenerator()
+        self.generator = passgen.OplopGenerator()
 
     def tearDown(self):
         os.remove("test_symbols")
@@ -72,7 +72,7 @@ class TestSuperGenPassGenerator(unittest.TestCase):
 
     def setUp(self):
         generate_default_symbols("test_symbols")
-        self.generator = SuperGenPassGenerator()
+        self.generator = passgen.SuperGenPassGenerator()
 
     def tearDown(self):
         os.remove("test_symbols")
@@ -93,12 +93,37 @@ class TestSuperGenPassGenerator(unittest.TestCase):
         # self.assertEqual(secure_password, "oSEWunR9EM")
         # Fails... FIXME
 
+class TestPasswordComposerGenerator(unittest.TestCase):
+    entropy_test_limit = 24 # Bigger than 24 => useless/impossible
+
+    def setUp(self):
+        generate_default_symbols("test_symbols")
+        self.generator = passgen.PasswordComposerGenerator()
+
+    def tearDown(self):
+        os.remove("test_symbols")
+
+    def test_entropy(self):
+        for i in xrange(1, self.entropy_test_limit + 1):
+            entropy = self.generator.get_entropy(i)
+            length = self.generator.get_length(entropy)
+            min_length = self.generator.get_minimum_length(entropy)
+            self.assertAlmostEqual(i, length)
+            self.assertTrue(i == min_length or i == min_length - 1)
+        self.assertAlmostEqual(self.generator.get_entropy(16),
+                               93.32192809488737)
+
+    def test_secure_password(self):
+        secure_password = self.generator.get_password("passman", "",
+                                                      "", "passman", 10)
+        self.assertEqual(secure_password, "RPIktBkD1a")
+
 class TestPassmanGenerator(unittest.TestCase):
     entropy_test_limit = 156 # Bigger than 156 => overflow
 
     def setUp(self):
         generate_default_symbols("test_symbols")
-        self.generator = PassmanGenerator("test_symbols")
+        self.generator = passgen.PassmanGenerator("test_symbols")
         random.seed(0)
 
     def tearDown(self):
