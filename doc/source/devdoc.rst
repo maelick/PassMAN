@@ -59,7 +59,7 @@ passphrase
 (:py:class:`~passgen.PasswordGenerator.get_password`). Currently
 subclasses of :py:class:`~passgen.PasswordGenerator` are
 :py:class:`~passgen.PassmanGenerator` and
-:py:class:`~passgen.OplopGenerator`. Future implementation are
+:py:class:`~passgen.OplopGenerator`,
 :py:class:`~passgen.SuperGenPassGenerator` and
 :py:class:`~passgen.PasswordComposerGenerator`.
 

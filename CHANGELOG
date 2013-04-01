@@ -12,6 +12,7 @@ New:
   * Random password generation: -n option to specify number of
     passwords to generate.
   * Diceware word list generator added.
+  * SuperGenPass & Password Composer algorithms added.
 Fix:
   * Bug #885703
   * Minor tweaks & fixes

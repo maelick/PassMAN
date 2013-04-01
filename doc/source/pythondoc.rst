@@ -25,15 +25,11 @@ Oplop generator
 SuperGenPass generator
 ......................
 
-This class is not yet implemented.
-
 .. autoclass:: passgen.SuperGenPassGenerator
    :members:
 
 PasswordComposer generator
 ..........................
-
-This class is not yet implemented.
 
 .. autoclass:: passgen.PasswordComposerGenerator
    :members:

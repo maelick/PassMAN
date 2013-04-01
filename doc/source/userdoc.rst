@@ -138,6 +138,8 @@ can be used by simply using their name.
 Currently implemented third-party algorithms:
 
 - oplop
+- SuperGenPass
+- Password Composer
 
 
 
@@ -312,3 +314,5 @@ http://world.std.com/~reinhold/diceware.html#languages).
 Third-party algorithms are based on:
 
 - http://code.google.com/p/oplop for oplop
+- http://supergenpass.com/faq/#Technical-Details for SuperGenPassGenerator
+- http://www.angel.net/~nic/passwd.sha1.1a.html for Password Composer
