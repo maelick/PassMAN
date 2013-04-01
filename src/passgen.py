@@ -171,8 +171,48 @@ class OplopGenerator(PasswordGenerator):
         return md5[:n]
 
 class SuperGenPassGenerator(PasswordGenerator):
+    """Generates passwords using the SuperGenPass's algorithm
+    (http://supergenpass.com/faq/#Technical-Details)."""
     yaml_tag = u'!SuperGenPassGenerator'
-    pass
+
+    def get_entropy(self, length):
+        """Returns the entropy for a given length."""
+        return math.log(64 ** (length - 1) * 10, 2)
+        pass
+
+    def get_length(self, entropy):
+        """Returns the length to have password for a given entropy."""
+        return math.log(2 ** entropy / 10., 64) + 1
+        pass
+
+    def get_next_password(self, n=8):
+        """Returns the next password given of length n (8 by default)
+        by the generator."""
+        website = "".join([chr(33 + random.randrange(94)) \
+                           for i in xrange(n)])
+        passphrase = "".join([chr(33 + random.randrange(94)) \
+                              for i in xrange(n)])
+        return self.get_password(name, "", "", passphrase, n)
+
+    def _generate_passwd(self, passwd, length):
+        i = 0
+        while i < 10 or not self._check_passwd(passwd[:length]):
+            md5 = hashlib.md5()
+            md5.update(passwd)
+            passwd = base64.b64encode(md5.digest(), "98")
+            i += 1
+        return passwd[:length]
+
+    def _check_passwd(self, passwd):
+        """Returns true if passwd starts with a lower case letter and
+        contains at least a number and a upper case letter."""
+        found = re.search(r"^[a-z]", passwd) and re.search(r"\d", passwd)
+        return found and re.search(r"[A-Z]", passwd)
+
+    def get_password(self, name, username, nonce, passphrase, n=8):
+        """Returns the next secure password of length n given by the
+        generator depending of the passphrase and username."""
+        return self._generate_passwd(passphrase + ":" + name, n)
 
 class PasswordComposerGenerator(PasswordGenerator):
     yaml_tag = u'!PasswordComposerGenerator'
