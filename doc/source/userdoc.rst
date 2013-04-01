@@ -171,6 +171,7 @@ The subcommand is one of the following:
 - add_tag
 - remove_tag
 - password
+- quick-password
 - generate
 - make_diceware
 - interpreter
@@ -255,6 +256,27 @@ Get the associated password of an entry. Options are:
   password from the tag/filtered list.
 - --clipboard: copy password to clipboard instead of printing it to
     stdout.
+
+Quick-password subcommand
+...................
+
+Get the associated password of a given entry (which will not be saved
+in the database)
+
+- -h, --help: display the help.
+- -g GENERATOR, --generator GENERATOR: the generator/algorithm name to
+   use.
+- -n, --name NAME: the name to give to the entry.
+- -u, --username USERNAME: the user's name.
+- --comment COMMENT: an optional comment/memo text for the entry.
+- --nonce: an optional text filed used to generate the password (only
+  used with PassMAN algorithm).
+- -l, --length LENGTH: the minimum length of the resulting password
+  (see configuration file for default)
+- -e --entropy ENTROPY: the minimum entropy of the password.
+- --clipboard: copy password to clipboard instead of printing it to
+    stdout.
+
 
 Generate subcommand
 ...................

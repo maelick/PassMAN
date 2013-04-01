@@ -69,6 +69,7 @@ class CLI:
         self.add_command(AddTag())
         self.add_command(RemoveTag())
         self.add_command(Password())
+        self.add_command(QuickPassword())
         self.add_command(Generate())
         self.add_command(MakeDiceware())
 
@@ -289,6 +290,39 @@ class Password(Command):
         actions.password(self.conf, self.args.filter, self.args.tag,
                          self.args.index, self.args.clipboard,
                          self.args.verbose)
+
+
+class QuickPassword(Command):
+    """Class used to represents the quick-password Command which
+    generates the password for a password entry not saved and directly
+    passed as argument."""
+
+    name = "quick-password"
+    help = "Gets the associated password of a given entry "
+    help += "(which will not be saved in the database)."
+
+    def init(self, subparser):
+        Command.init(self, subparser)
+        subparser.add_argument("-g", "--generator", default=None,
+                               help="The generator's name.")
+        subparser.add_argument("-n", "--name", required=True,
+                               help="The entry's name.")
+        subparser.add_argument("-u", "--username", required=True)
+        subparser.add_argument("--comment", default="")
+        subparser.add_argument("--nonce", default="")
+        subparser.add_argument("-l", "--length", type=int, default=0)
+        subparser.add_argument("-e", "--entropy", type=float, default=0.)
+        subparser.add_argument("--clipboard", action="store_true",
+                                help="Copy password to system clipboard " + \
+                                "instead of printing it to stdout.")
+
+    def action(self):
+        actions.load_database(self.conf, self.loader)
+        actions.quick_password(self.conf, self.args.generator, self.args.name,
+                               self.args.username, self.args.comment,
+                               self.args.nonce, self.args.length,
+                               self.args.entropy, self.args.clipboard,
+                               self.args.verbose)
 
 
 class Generate(Command):

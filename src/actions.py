@@ -123,6 +123,21 @@ def list_entries(conf, filter=None, tag=None, verbose=False,
             print s
 
 
+def get_entropy_length(conf, generator, entropy, length):
+    if entropy:
+        manager = conf["database"].generator_manager
+        generator_inst = manager.get_generator(generator)
+        return max(generator_inst.get_minimum_length(entropy), length)
+    elif length:
+        return length
+    elif conf["default_password_length"].has_key(generator):
+        return conf["default_password_length"][generator]
+    elif generator.split(":")[1].startswith("diceware"):
+        return conf["default_password_length"]["diceware"]
+    else:
+        return conf["default_password_length"]["normal"]
+
+
 def add(conf, name, username, comment="", nonce="",
         length=0, entropy=0., generator=None):
     """Add an entry to a password database.
@@ -134,24 +149,10 @@ def add(conf, name, username, comment="", nonce="",
     - *length* is the minimum length (if 0, retrieved from configuration)
     - *generator* is the generator (if None, retrieved from configuration)"""
     generator = generator if generator else conf["default_generator"]
-
-    if entropy:
-        manager = conf["database"].generator_manager
-        generator_inst = manager.get_generator(generator)
-        length = max(generator_inst.get_minimum_length(entropy), length)
-    elif length:
-        pass
-    elif conf["default_password_length"].has_key(generator):
-        length = conf["default_password_length"][generator]
-    elif generator.split(":")[1].startswith("diceware"):
-        length = conf["default_password_length"]["diceware"]
-    else:
-        length = conf["default_password_length"]["normal"]
-
+    length = get_entropy_length(conf, generator, entropy, length)
     entry = passman.PasswordEntry(generator, name,
                                   username, comment,
-                                  nonce, length,
-                                  entropy)
+                                  nonce, length)
     conf["database"].set_entry(entry)
     entry.get_password(conf["database"].generator_manager, "")
 
@@ -214,6 +215,20 @@ def copy2clipboard(conf, password):
     p.communicate(password)
 
 
+def gen_password(conf, entry, clipboard=False, verbose=False):
+    if verbose:
+        print "Password for entry: {}".format(entry)
+    prompt = "Please enter the master passphrase: "
+    passphrase = getpass.getpass(prompt)
+    password = entry.get_password(conf["database"].generator_manager,
+                                  passphrase)
+
+    if clipboard:
+        copy2clipboard(conf, password)
+    else:
+        print password
+
+
 def password(conf, filter=None, tag=None, index=0,
              clipboard=False, verbose=False):
     """Get the password of an entry
@@ -233,17 +248,28 @@ def password(conf, filter=None, tag=None, index=0,
         entries = conf["database"].get_entries(tag)
 
     entry = entries[index]
-    if verbose:
-        print "Password for entry: {}".format(entry)
-    prompt = "Please enter the master passphrase: "
-    passphrase = getpass.getpass(prompt)
-    password = entry.get_password(conf["database"].generator_manager,
-                                  passphrase)
+    gen_password(conf, entry, clipboard, verbose)
 
-    if clipboard:
-        copy2clipboard(conf, password)
-    else:
-        print password
+
+def quick_password(conf, generator, name, username, comment, nonce,
+                   length, entropy, clipboard=False, verbose=False):
+    """Make an entry (without saving it) and generates a password
+    - *conf* is a configuration dict
+    - *generator*, *name*, *username*, *comment*, *nonce*, *length* and
+      *entropy* are directly passed to the PasswordEntry constructor
+    - *clipboard* if True will store password in clipboard
+    - *verbose* verbose mode if True"""
+    generator = generator if generator else conf["default_generator"]
+    length = get_entropy_length(conf, generator, entropy, length)
+    entry = passman.PasswordEntry(generator, name,
+                                  username, comment,
+                                  nonce, length)
+    gen_password(conf, entry, clipboard, verbose)
+    if verbose:
+        manager = conf["database"].generator_manager
+        generator = manager.get_generator(generator)
+        entropy = generator.get_entropy(length)
+        print "Entropy: {}".format(entropy)
 
 
 def generate(conf, generator, length=0, entropy=0,
@@ -258,16 +284,7 @@ def generate(conf, generator, length=0, entropy=0,
     generator_name = generator if generator else conf["default_generator"]
     generator = manager.get_generator(generator_name)
 
-    if entropy:
-        length = max(generator.get_minimum_length(entropy), length)
-    elif length:
-        pass
-    elif conf["default_password_length"].has_key(generator_name):
-        length = conf["default_password_length"][generator_name]
-    elif generator_name.split(":")[1].startswith("diceware"):
-        length = conf["default_password_length"]["diceware"]
-    else:
-        length = conf["default_password_length"]["normal"]
+    length = get_entropy_length(conf, generator, entropy, length)
     entropy = generator.get_entropy(length)
     password = generator.get_random_password(length)
     if verbose:
