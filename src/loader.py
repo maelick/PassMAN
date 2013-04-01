@@ -25,6 +25,22 @@ class CodingError(Exception):
     decoding entries."""
     pass
 
+def yaml_load(input):
+    entries = yaml.load(input)
+    for e in entries:
+        attr = e.__dict__
+        if "comment" not in attr:
+            e.comment = ""
+        if "nonce" not in attr:
+            e.nonce = ""
+        if "length" not in attr:
+            e.length = 1
+        if "entropy" not in attr:
+            e.entropy = None
+        if "tags" not in attr:
+            e.tags = set()
+    return entries
+
 class Loader:
     """A Loader is used to save and load password entries from a
     file. Loader is an abstract class that should be overriden."""
@@ -50,7 +66,7 @@ class YAMLLoader(Loader):
 
     def load(self, filename, passphrase=None):
         with open(filename) as f:
-            return yaml.load(f)
+            return yaml_load(f)
 
 class AESLoader(Loader):
     """An AESLoader stores and retrieves password entries using YAML,
@@ -85,7 +101,7 @@ class AESLoader(Loader):
                                  stderr=subprocess.PIPE)
             result = p.communicate(f.read())
             if not result[1]:
-                return yaml.load(bz2.decompress(result[0]))
+                return yaml_load(bz2.decompress(result[0]))
             else:
                 raise CodingError
 

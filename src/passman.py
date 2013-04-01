@@ -30,7 +30,7 @@ class PasswordEntry(yaml.YAMLObject):
     yaml_tag = u'!PasswordEntry'
 
     def __init__(self, generator, name, username, comment="", nonce="",
-                 length=15, entropy=None, tags=set()):
+                 length=1, entropy=None, tags=set()):
         """Initializes the entry with the parameters. It is possible
         to define a minimum entropy, in this case the required minimum
         length will be also computed."""
