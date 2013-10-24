@@ -1,0 +1,17 @@
+### PassMAN Configuration File ###
+
+default_generator: sha512:ascii
+symbols_dir: ~/.passman/symbols
+
+#clipboard_cmdline: "xclip -i -selection clipboard"
+clipboard_cmdline: "xsel -bi"
+
+default_password_length:
+    normal: 12
+    diceware: 5
+    oplop: 8
+
+db:
+    filename: ~/.passman/passman.db
+    format: aes
+    #passphrase: secretpassphrase
