@@ -2,22 +2,23 @@ New in v0.2.0 (?)
 -----------------
 
 Second beta version.
-New:
-  * Distant loading/saving using FTP and SFTP: feature removed.
-  * CLI interpreter added.
-  * Create and save (only for interpreter) database commands added.
-  * Quick-password command added.
-  * Sphinx doc added.
-  * Verbose mode.
-  * GPG database encryption.
-  * Random password generation: -n option to specify number of
-    passwords to generate.
-  * Diceware word list generator added.
-  * SuperGenPass & Password Composer algorithms added.
-Fix:
-  * Bug #885703
-  * Minor tweaks & fixes
-  * Overall refactoring
+
+* New:
+    * Distant loading/saving using FTP and SFTP: feature removed.
+    * CLI interpreter added.
+    * Create and save (only for interpreter) database commands added.
+    * Quick-password command added.
+    * Sphinx doc added.
+    * Verbose mode.
+    * GPG database encryption.
+    * Random password generation: -n option to specify number of
+      passwords to generate.
+    * Diceware word list generator added.
+    * SuperGenPass & Password Composer algorithms added.
+* Fix:
+    * Bug #885703
+    * Minor tweaks & fixes
+    * Overall refactoring
 
 
 
@@ -25,14 +26,16 @@ New in v0.1.0 (31/10/2011)
 --------------------------
 
 First beta version.
-New:
-  * Password generation based on differents algorithms and dictionaries
-  * Password management with tags and regex filters
-  * CLI interface to the database including commands: retrieve, push, list,
-    add, add_tag, remove_tag, remove, password, generate.
-  * FTP and SFTP.
-  * YAML and AES databases.
-  * YAML configuration file.
-  * Dictionaries included: diceware and diceware8k
-    (de, en, fi, fr, it, nl, sv), latin alphabet, lowercase (nocase) latin
-    alphabet, alphanumerical, base64 and ascii.
+
+* New:
+    * Password generation based on differents algorithms and dictionaries
+    * Password management with tags and regex filters
+    * CLI interface to the database including commands: retrieve,
+      push, list, add, add_tag, remove_tag, remove, password,
+      generate.
+    * FTP and SFTP.
+    * YAML and AES databases.
+    * YAML configuration file.
+    * Dictionaries included: diceware and diceware8k (de, en, fi, fr,
+      it, nl, sv), latin alphabet, lowercase (nocase) latin alphabet,
+      alphanumerical, base64 and ascii.
